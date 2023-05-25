@@ -5,6 +5,11 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import * as PlotlyJS from 'plotly.js-dist';
+import { PlotlyModule } from 'angular-plotly.js';
+
+PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
   declarations: [
@@ -14,7 +19,9 @@ import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    MatDialogModule,
+    PlotlyModule
   ],
   providers: [],
   bootstrap: [AppComponent]
