@@ -8,6 +8,8 @@ import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import * as PlotlyJS from 'plotly.js-dist';
 import { PlotlyModule } from 'angular-plotly.js';
+import { NgChartsModule } from 'ng2-charts';
+import { CompressionTube } from 'src/compressiontube';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -21,7 +23,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     AppRoutingModule,
     BrowserAnimationsModule,
     MatDialogModule,
-    PlotlyModule
+    PlotlyModule,
+    NgChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

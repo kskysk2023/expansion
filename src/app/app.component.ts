@@ -1,20 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
-import { DialogRef } from '@angular/cdk/dialog';
 import * as dfd from 'danfojs';
-import { CsvInputOptionsBrowser } from 'danfojs-node/dist/danfojs-base/shared/types';
-import { ParseConfig } from 'papaparse';
+import { Papa, ParseResult } from 'ngx-papaparse';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit{
-  constructor(private dialog : MatDialog){}
+
+export class AppComponent{
+  constructor(private dialog : MatDialog, private papa: Papa){  }
   title = 'expansion';
+  public df : dfd.DataFrame = new dfd.DataFrame;
+
   openErrorDialog(errorMessage: string): void{
     const dialogRef = this.dialog.open(ErrorDialogComponent, {
       width: '400px',
@@ -22,49 +23,70 @@ export class AppComponent implements OnInit{
     });
   }
 
-  public ngOnInit()
-  {
-
-  }
-
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
-    const reader: FileReader = new FileReader();
 
-    reader.onload = (e: any) => {
-      const fileContent = e.target.result;
-      if(!fileContent){
-        console.log("読み込みエラー" + e);
-        this.openErrorDialog("読み込みエラー");
-      }
+    if(!file){
+      console.log("読み込みエラー" + event.error);
+      this.openErrorDialog("読み込みエラー");
+    }
 
-      if(file.name.endsWith(".csv")){
-        console.log("csvを読み込んだ" + file.name);
-        this.ReadCsv(file);
-      }
-      else if (file.name.endsWith(".MEM")){
-        console.log("MEMを読み込んだ" + file.name);
-      }
-    };
-    reader.readAsText(file);
+    if(file.name.endsWith(".csv")){
+      console.log("csvを読み込んだ" + file.name);
+      this.ReadCsv(file)
+    }
+    else if (file.name.endsWith(".MEM")){
+      console.log("MEMを読み込んだ" + file.name);
+    }
+
   }
 
-  ReadCsv(csvfile: File){
-    dfd.readCSV(csvfile)
-    .then(df => {
-        console.log("read")
-        df.plot("div1").table() //display csv as table
+  oncomplete =(results : ParseResult<any>, file? : File) =>{
+    console.log(results.data);
+    this.df = new dfd.DataFrame(results.data);
 
-        const new_df = df.setIndex({ column: "時間[s]", drop: true }); //resets the index to Date column
-        new_df.head().print() //
-        new_df.plot("div2").line({
-            config: {
-                columns: ["CH1-1[V]", "CH2-1[V]", "CH3-1[V]"]
-            }
-        })  //makes a timeseries plot
+    const wb = XLSX.utils.book_new();
+    new CompressionTube(this.df["時間[s]"], this.df["CH1-1[V]"]).write(wb);
+    XLSX.writeFile(wb, "SheetJSESMTest.xlsx");
+    const layout = {
+      font: { family: "Times new Roman", size: 20, color: "#000" },
+      title: {
+        text: "Time series plot of Compression tube pressure and PCB sensors",
+        x: 0,
+      },
+      legend: {
+        bgcolor: "#ffffff",
+        bordercolor: "#444",
+        borderwidth: 1,
+        font: { family: "Times new Roman", size: 10, color: "#000" },
+      },
+      width: 1600,
+      yaxis: {
+        title: "Voltage, V",
+      },
+      xaxis: {
+        title: "time, s",
+      },
+    };
+      
+    const config = {
+      columns: ["CH1-1[V]", "CH2-1[V]", "CH3-1[V]", "CH4-1[V]", "CH5-1[V]"],
+      displayModeBar: true,
+      displaylogo: false,
+    };
+    this.df.plot("table").table() //display csv as table
 
-    }).catch(err => {
-        console.log(err);
-    })
+    const new_df = this.df.setIndex({ column: "時間[s]", drop: true }); //resets the index to Date column
+    new_df.head().print() //
+    new_df.plot("pressureChart").line({config: config, layout: layout});
+  }
+
+  ReadCsv(file: any){
+    this.papa.parse(file, {
+        encoding:'Shift-JIS',
+        header: true,
+        complete : this.oncomplete
+      }
+    );
   }
 }
