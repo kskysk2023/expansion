@@ -4,6 +4,7 @@ import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
 import * as dfd from 'danfojs';
 import { Papa, ParseResult } from 'ngx-papaparse';
 import * as XLSX from 'xlsx';
+import { CompressionTube } from 'src/compressiontube';
 
 @Component({
   selector: 'app-root',
@@ -46,7 +47,8 @@ export class AppComponent{
     this.df = new dfd.DataFrame(results.data);
 
     const wb = XLSX.utils.book_new();
-    new CompressionTube(this.df["時間[s]"], this.df["CH1-1[V]"]).write(wb);
+
+    new CompressionTube(this.df.loc({columns: ["時間[s]", "CH1-1[V]"]}));
     XLSX.writeFile(wb, "SheetJSESMTest.xlsx");
     const layout = {
       font: { family: "Times new Roman", size: 20, color: "#000" },
@@ -85,6 +87,7 @@ export class AppComponent{
     this.papa.parse(file, {
         encoding:'Shift-JIS',
         header: true,
+        dynamicTyping:true,
         complete : this.oncomplete
       }
     );

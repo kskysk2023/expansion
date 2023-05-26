@@ -14,37 +14,45 @@ export class CompressionTube {
     return x;
   }
   private Pc: dfd.DataFrame;
-  private t: dfd.DataFrame;
-  private Pmax: dfd.Series;
-  private Pr: dfd.Series;
-  private Pr_row: number;
+  private Pmax: number;
+  private Pr: number;
+/*   private Pr_row: number;
   private H_end_row: number;
   private t_hold_start: number;
-  private t_hold_end: number;
+  private t_hold_end: number; */
 
-  constructor(t :dfd.DataFrame, V_Pc:dfd.DataFrame) {
+  constructor(V_Pc:dfd.DataFrame) {
+    this.Pc = V_Pc;
+    console.log("V_Pc...");
+    V_Pc.print();
+    console.log("Pc... ");
+    this.Pc["CH1-1[V]"].add(1.4).mul(25.482).print();
+    dfd.concat({this.Pc, this.Pc["CH1-1[V]"].add(1.4).mul(25.482)})
+    this.Pc.append([this.Pc["CH1-1[V]"].add(1.4).mul(25.482)], "Pc");
+    console.log("Pc...." , this.Pc.print());
     
-    this.Pc = V_Pc.add(1.4).mul(25.482);
-    this.t = t;
+    this.Pmax = this.Pc["Pc"].max();
 
-    this.Pmax = this.Pc.max();
-    this.Pr = this.Pmax.mul(0.9);
-    this.Pr_row = this.Pc[value >= this.Pr);
-    this.H_end_row = this.Pr_row + this.Pc.slice(this.Pr_row).findIndex((value) => value < this.Pr);
+    const pr =  this.Pc.loc(this.Pc.ge(this.Pmax * 0.9)) //最大圧の0.9倍の圧力を探し、prとする
+    this.Pr = typeof pr != "number"? 0 : pr;
 
-    this.t_hold_start = this.senkeiKinjix(this.t[this.Pr_row - 1], this.t[this.Pr_row], this.Pc[this.Pr_row - 1], this.Pc[this.Pr_row], this.Pr);
+/*     const hend = this.Pc.iloc([this.Pr_row]).lt(this.Pr).iat(0);
+    this.H_end_row = typeof hend === "number" ? this.Pr_row + hend : this.Pr_row;
+
+    this.t_hold_start = this.senkeiKinjix(this.Pc.index.at this.Pr_row - 1, this.Pc.index, this.Pc[this.Pr_row - 1], this.Pc[this.Pr_row], this.Pr);
 
     this.t_hold_end = this.senkeiKinjix(this.t[this.H_end_row - 1], this.t[this.H_end_row], this.Pc[this.H_end_row - 1], this.Pc[this.H_end_row], this.Pr);
+    console.log("construct compressiontube ... "+ this.Pmax, this.Pr, this.Pr_row, this.H_end_row, this.t_hold_start, this.t_hold_end) */
   }
 
-  public write(wb: any): void {
+/*   public write(wb: any): void {
     const pcRow = "'data'!C1:'data'!C8002";
     const tRow = "'data'!A1:'data'!A8002";
 
     const table1Data = [
       ["t", "t", "Pc"],
       ["s", "ms", "MPa"],
-      ...this.t.slice(0, this.Pc.length - 1).map((_, i) => [this.t[i], this.t[i] * 1000, this.Pc[i]])
+      ...this.t.values.slice(0, this.Pc.count() - 1).map((_, i) => [this.t.values[i], this.t.mul(1000).values[i], this.Pc.values[i]])
     ];
     const ws = XLSX.utils.aoa_to_sheet(table1Data)
 
@@ -102,5 +110,5 @@ export class CompressionTube {
     //CalcTable(wsC, 1, 13, table5Data).OutPut();
 
     XLSX.utils.book_append_sheet(wb, ws, 'comp');
-  }
+  } */
 }
