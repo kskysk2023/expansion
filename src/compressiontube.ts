@@ -1,4 +1,5 @@
 import * as dfd from 'danfojs';
+import { DataFrame } from 'danfojs/dist/danfojs-base';
 import * as XLSX from 'xlsx';
 
 export class CompressionTube {
@@ -26,9 +27,8 @@ export class CompressionTube {
     console.log("V_Pc...");
     V_Pc.print();
     console.log("Pc... ");
-    this.Pc["CH1-1[V]"].add(1.4).mul(25.482).print();
-    dfd.concat({this.Pc, this.Pc["CH1-1[V]"].add(1.4).mul(25.482)})
-    this.Pc.append([this.Pc["CH1-1[V]"].add(1.4).mul(25.482)], "Pc");
+    this.Pc = dfd.concat({dfList: [this.Pc, this.Pc["CH1-1[V]"].add(1.4).mul(25.482)], axis: 1}) as DataFrame
+    this.Pc = this.Pc.rename({"CH1-1[V]1": "Pc"});
     console.log("Pc...." , this.Pc.print());
     
     this.Pmax = this.Pc["Pc"].max();
