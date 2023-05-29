@@ -148,6 +148,13 @@ export class AppComponent{
       width: 1600, height:1000}
     });
   }
+  readExcelFile(file : string) {
+    const workbook = XLSX.readFile(file);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    return jsonData;
+  }
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
     this.filename = file.name;
@@ -166,6 +173,12 @@ export class AppComponent{
         this.ReadCsv(text);
       }
       reader.readAsText(file, "Shift-JIS");
+      const nameparts = file.name.split("_");
+      const excelPartName = "20" + nameparts[1].slice(0, 2) + "_" + nameparts[1].slice(2) + "_" + nameparts[0].slice(0, 4);
+      console.log(excelPartName);
+
+      const jsonData = this.readExcelFile("./ShockTube結果.xlsx");
+      console.log(jsonData); // 読み込んだExcelデータをコンソールに表示する例
     }
     else if (file.name.endsWith(".MEM")){
       console.log("MEMを読み込んだ" + file.name);

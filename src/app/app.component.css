@@ -34,8 +34,7 @@ opacity: 0.8;
 }
 .row-container{
 display: flex;
-margin: 82px auto 32px;
-padding: 0 16px;flex-direction: row;
+flex-direction: row;
 }
 .content {
 display: flex;
