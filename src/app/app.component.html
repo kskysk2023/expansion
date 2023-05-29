@@ -18,6 +18,7 @@
 <div class="content" role="main">
 
   <!-- Highlight Card -->
+  <div class="row-container">
   <div class="card-container">
     <mat-card class="card">
       <mat-card-header>
@@ -42,31 +43,31 @@
         <mat-card-actions align="end">
           <mat-form-field>
             <mat-label>圧縮管圧力センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.compression" name="CH">
+            <mat-select [(value)]="pressureSelected.compression" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field>
             <mat-label>中圧管1センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.m1" name="CH">
+            <mat-select [(value)]="pressureSelected.m1" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field>
             <mat-label>中圧管2センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.m2" name="CH">
+            <mat-select [(value)]="pressureSelected.m2" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field>
             <mat-label>低圧管1センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.l1" name="CH">
+            <mat-select [(value)]="pressureSelected.l1" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field>
             <mat-label>低圧管2センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.l2" name="CH">
+            <mat-select [(value)]="pressureSelected.l2" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
@@ -81,25 +82,25 @@
         <mat-card-actions align="end">
           <mat-form-field>
             <mat-label>ピストンI</mat-label>
-            <mat-select [(value)]="microSelected.pI" name="CH">
+            <mat-select [(value)]="microSelected.pI" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field>
             <mat-label>ピストンQ</mat-label>
-            <mat-select [(value)]="microSelected.pQ" name="CH">
+            <mat-select [(value)]="microSelected.pQ" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field>
             <mat-label>破膜I</mat-label>
-            <mat-select [(value)]="microSelected.rI" name="CH">
+            <mat-select [(value)]="microSelected.rI" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field>
             <mat-label>破膜Q</mat-label>
-            <mat-select [(value)]="microSelected.rQ" name="CH">
+            <mat-select [(value)]="microSelected.rQ" name="CH" (selectionChange)="onSelectionChanged($event)">
               <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
             </mat-select>
           </mat-form-field>
@@ -107,6 +108,7 @@
       </mat-card>
       </div> 
     </div>
+  </div>
 
   <!-- Next Steps -->
   <mat-card class="card">

@@ -80,6 +80,74 @@ export class AppComponent{
     });
   }
 
+  onSelectionChanged(event: any){
+    this.comp = new CompressionTube(this.df.loc({columns: ["時間[s]", this.pressureSelected.compression]}));
+    this.micro = new Microwave(this.df.loc({columns: ["時間[s]", this.microSelected.rI, this.microSelected.rQ]}));
+    this.shock = new Shock(this.df.loc({columns: ["時間[s]", this.pressureSelected.m1, this.pressureSelected.m2, this.pressureSelected.l1, this.pressureSelected.l2]}));
+
+    const new_df = this.df.setIndex({ column: "時間[s]", drop: true }); //resets the index to Date column
+    new_df.head().print() //
+    const t = this.df["時間[s]"].values;
+    this.graph.data = [
+      {
+        x: t,
+        y: this.comp.Pc["Pc"].values,
+        name:"圧縮",
+        mode:'lines',
+        yaxis:"y1"
+      },
+      {
+        x: t,
+        y: this.df[this.pressureSelected.m1].values,
+        name:"中1",
+        mode:"lines",
+        yaxis:"y2"
+      },
+      {
+        x: t,
+        y: this.df[this.pressureSelected.m2].values,
+        name:"中2",
+        mode:"lines",
+        yaxis:"y2"
+      },
+      {
+        x: t,
+        y: this.df[this.pressureSelected.l1].values,
+        name:"低1",
+        mode:"lines",
+        yaxis:"y2"
+      },
+      {
+        x: t,
+        y: this.df[this.pressureSelected.l2].values,
+        name:"低2",
+        mode:"lines",
+        yaxis:"y2"
+      },
+      {
+        x: t,
+        y: this.micro.IQ["P"].values,
+        name:"Power",
+        mode:"lines",
+        yaxis:"y3"
+      },
+    ];
+
+    //display csv as table
+    this.micro.IQ.plot("tableCalced").table({
+    layout: {
+      title:"Calc data",
+      font: {family: "Times new Roman", size: 10.5, color: "#000" },
+      width: 1600, height:1000}
+    });
+    //display csv as table
+    this.df.plot("table").table({
+    layout: {
+      title:"HIOKI data",
+      font: {family: "Times new Roman", size: 10.5, color: "#000" },
+      width: 1600, height:1000}
+    });
+  }
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
     this.filename = file.name;
@@ -110,77 +178,10 @@ export class AppComponent{
     this.df = new dfd.DataFrame(results.data);
     //最終行に余分な公があるので削る
     this.df.drop({index: [this.df.shape[0] -1], inplace:true})
-    const t = this.df["時間[s]"].values;
     
     //メニューにchを登録
     this.CHs=this.df.columns;
-
-    this.comp = new CompressionTube(this.df.loc({columns: ["時間[s]", "CH1-1[V]"]}));
-    this.micro = new Microwave(this.df.loc({columns: ["時間[s]", "CH7-1[V]", "CH7-2[V]"]}));
-    this.shock = new Shock(this.df.loc({columns: ["時間[s]", "CH1-1[V]"]}));
-
-    const new_df = this.df.setIndex({ column: "時間[s]", drop: true }); //resets the index to Date column
-    new_df.head().print() //
-
-    this.graph.data = [
-      {
-        x: t,
-        y: this.comp.Pc["Pc"].values,
-        name:"圧縮",
-        mode:'lines',
-        yaxis:"y1"
-      },
-      {
-        x: t,
-        y: this.df["CH2-1[V]"].values,
-        name:"中1",
-        mode:"lines",
-        yaxis:"y2"
-      },
-      {
-        x: t,
-        y: this.df["CH3-1[V]"].values,
-        name:"中2",
-        mode:"lines",
-        yaxis:"y2"
-      },
-      {
-        x: t,
-        y: this.df["CH4-1[V]"].values,
-        name:"低1",
-        mode:"lines",
-        yaxis:"y2"
-      },
-      {
-        x: t,
-        y: this.df["CH5-1[V]"].values,
-        name:"低2",
-        mode:"lines",
-        yaxis:"y2"
-      },
-      {
-        x: t,
-        y: this.micro.IQ["P"].values,
-        name:"Power",
-        mode:"lines",
-        yaxis:"y3"
-      },
-    ];
-
-    //display csv as table
-    this.micro.IQ.plot("tableCalced").table({
-    layout: {
-      title:"Calc data",
-      font: {family: "Times new Roman", size: 10.5, color: "#000" },
-      width: 1600, height:1000}
-    });
-    //display csv as table
-    this.df.plot("table").table({
-    layout: {
-      title:"HIOKI data",
-      font: {family: "Times new Roman", size: 10.5, color: "#000" },
-      width: 1600, height:1000}
-    });
+    this.onSelectionChanged("");
   }
   DownloadExcel(){
     const wb = XLSX.utils.book_new();
