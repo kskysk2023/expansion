@@ -1,0 +1,91 @@
+<div class="content">
+    <!-- Highlight Card -->
+    <mat-card class="card file">
+      <mat-card-header>
+        <mat-card-title>ファイルを開く</mat-card-title>
+        <mat-card-subtitle>csvかMEMを選ぶ</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions align="end">
+        <input type="file" accept=".csv, .MEM" (change)="onFileSelected($event)" />
+      </mat-card-actions>
+      <mat-card-footer *ngIf="this.settingService.filename !=''">
+        <button mat-icon-button matTooltip="Basic" aria-label="Download excel file" (click)="DownloadExcel()">
+          <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+            <path d="M220-160q-24 0-42-18t-18-42v-143h60v143h520v-143h60v143q0 24-18 42t-42 18H220Zm260-153L287-506l43-43 120 120v-371h60v371l120-120 43 43-193 193Z"/>
+          </svg>
+        </button>
+      </mat-card-footer>
+    </mat-card>
+    <div class="card bindP" *ngIf="this.settingService.filename">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>圧力のデータ</mat-card-title>
+        </mat-card-header>
+        <mat-card-actions>
+          <mat-form-field>
+            <mat-label>圧縮管圧力センサ</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.compression" name="CH" (selectionChange)="onSelectedChanged($event)">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>中圧管1センサ</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.m1" name="CH">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>中圧管2センサ</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.m2" name="CH">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>低圧管1センサ</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.l1" name="CH">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>低圧管2センサ</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.l2" name="CH">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+    <div class="card bindM" *ngIf="this.settingService.filename">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>マイクロ波のデータ</mat-card-title>
+        </mat-card-header>
+        <mat-card-actions align="end">
+          <mat-form-field>
+            <mat-label>ピストンI</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.pI" name="CH">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>ピストンQ</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.pQ" name="CH">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>破膜I</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.rI" name="CH">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>破膜Q</mat-label>
+            <mat-select [(value)]="this.settingService.CHBind.rQ" name="CH">
+              <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>

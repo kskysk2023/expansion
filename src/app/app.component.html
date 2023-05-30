@@ -1,7 +1,6 @@
 
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <!-- Toolbar -->
 <div class="toolbar" role="banner">
@@ -14,132 +13,43 @@
       </svg>
     </a>
 </div>
+<app-setting></app-setting>
 
-<div class="content" role="main">
-
-  <!-- Highlight Card -->
-  <div class="row-container">
-  <div class="card-container">
-    <mat-card class="card">
-      <mat-card-header>
-        <mat-card-title>ファイルを開く</mat-card-title>
-        <mat-card-subtitle>csvかMEMを選ぶ</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-actions align="end">
-        <input type="file" accept=".csv, .MEM" (change)="onFileSelected($event)" />
-      </mat-card-actions>
-      <mat-card-footer *ngIf="filename !=''">
-        <button mat-icon-button matTooltip="Basic" aria-label="Download excel file" (click)="DownloadExcel()">
-          <mat-icon>download</mat-icon>
-        </button>
-      </mat-card-footer>
-    </mat-card>
-
+<!-- Next Steps -->
+<mat-card class="card">
+  <mat-card-actions>
+    <plotly-plot [data]="graph.data" [layout]="graph.layout" [config]="graph.config" (plotlyClick)="onPlotlyClick($event)"></plotly-plot>
+  </mat-card-actions>
+  <mat-card-footer>
     <div class="card-container">
-      <mat-card class="card" *ngIf="filename !=''">
-        <mat-card-header>
-          <mat-card-title>圧力のデータ</mat-card-title>
-        </mat-card-header>
-        <mat-card-actions align="end">
-          <mat-form-field>
-            <mat-label>圧縮管圧力センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.compression" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>中圧管1センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.m1" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>中圧管2センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.m2" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>低圧管1センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.l1" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>低圧管2センサ</mat-label>
-            <mat-select [(value)]="pressureSelected.l2" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </mat-card-actions>
-      </mat-card>
+      <div class="shockdatarow">中圧管1: {{shockService.t_P[0]}}</div>
+      <div class="shockdatarow">中圧管2: {{shockService.t_P[1]}}</div>
+      <div class="shockdatarow">低圧管1: {{shockService.t_P[2]}}</div>
+      <div class="shockdatarow">低圧管2: {{shockService.t_P[3]}}</div>
     </div>
     <div class="card-container">
-      <mat-card class="card" *ngIf="filename !=''">
-        <mat-card-header>
-          <mat-card-title>マイクロ波のデータ</mat-card-title>
-        </mat-card-header>
-        <mat-card-actions align="end">
-          <mat-form-field>
-            <mat-label>ピストンI</mat-label>
-            <mat-select [(value)]="microSelected.pI" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>ピストンQ</mat-label>
-            <mat-select [(value)]="microSelected.pQ" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>破膜I</mat-label>
-            <mat-select [(value)]="microSelected.rI" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>破膜Q</mat-label>
-            <mat-select [(value)]="microSelected.rQ" name="CH" (selectionChange)="onSelectionChanged($event)">
-              <mat-option *ngFor="let CH of CHs" [value]="CH">{{CH}}</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </mat-card-actions>
-      </mat-card>
-      </div> 
+    <div class="shockdatarow">V12: {{shockService.getVelocity()[0] | number: '4.0-2'}} [m/s]</div>
+    <div class="shockdatarow">V23: {{shockService.getVelocity()[1] | number: '4.0-2'}} [m/s]</div>
+    <div class="shockdatarow">V34: {{shockService.getVelocity()[2] | number: '4.0-2'}} [m/s]</div>
     </div>
-  </div>
+  </mat-card-footer>
+</mat-card>
 
-  <!-- Next Steps -->
-  <mat-card class="card">
-    <mat-card-actions>
-      <plotly-plot [data]="graph.data" [layout]="graph.layout" [config]="graph.config" (plotlyClick)="onPlotlyClick($event)"></plotly-plot>
-    </mat-card-actions>
-    <mat-card-footer *ngIf="shock">
-      <div class="card-container">
-        <div class="shockdatarow">中圧管1: {{shock.t_P[0]}}</div>
-        <div class="shockdatarow">中圧管2: {{shock.t_P[1]}}</div>
-        <div class="shockdatarow">低圧管1: {{shock.t_P[2]}}</div>
-        <div class="shockdatarow">低圧管2: {{shock.t_P[3]}}</div>
-     </div>
-     <div class="card-container">
-      <div class="shockdatarow">V12: {{shock.getVelocity()[0] | number: '4.0-2'}} [m/s]</div>
-      <div class="shockdatarow">V23: {{shock.getVelocity()[1] | number: '4.0-2'}} [m/s]</div>
-      <div class="shockdatarow">V34: {{shock.getVelocity()[2] | number: '4.0-2'}} [m/s]</div>
-     </div>
-    </mat-card-footer>
-  </mat-card>
+<mat-card class="card">
+  <mat-card-actions>
+    <div id="tableCondition"></div>
+  </mat-card-actions>
+</mat-card>
 
-  <mat-card class="card">
-    <mat-card-actions>
-      <div id="tableCalced"></div>
-    </mat-card-actions>
-  </mat-card>
-  <mat-card class="card">
-    <mat-card-actions>
-      <div id="table"></div>
-    </mat-card-actions>
-  </mat-card>
-</div>
+<mat-card class="card">
+  <mat-card-actions>
+    <div id="tableCalced"></div>
+  </mat-card-actions>
+</mat-card>
+<mat-card class="card">
+  <mat-card-actions>
+    <div id="table"></div>
+  </mat-card-actions>
+</mat-card>
 
 <router-outlet></router-outlet>

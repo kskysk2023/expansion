@@ -11,13 +11,16 @@ import { PlotlyModule } from 'angular-plotly.js';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCardModule} from '@angular/material/card'; 
 import {MatSelectModule} from "@angular/material/select"
+import {MatGridListModule, MatGridTile} from "@angular/material/grid-list";
+import { SettingComponent } from './setting/setting.component'
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
   declarations: [
     AppComponent,
-    ErrorDialogComponent
+    ErrorDialogComponent,
+    SettingComponent
   ],
   imports: [
     BrowserModule,
@@ -28,7 +31,9 @@ PlotlyModule.plotlyjs = PlotlyJS;
     PlotlyModule,
     MatIconModule,
     MatSelectModule,
-    //NgChartsModule
+    //NgChartsModule,
+
+    MatGridListModule
   ],
   providers: [],
   bootstrap: [AppComponent]

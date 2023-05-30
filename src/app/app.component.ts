@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
 import * as dfd from 'danfojs';
-import { Papa, ParseResult } from 'ngx-papaparse';
-import * as XLSX from 'xlsx';
-import { CompressionTube } from 'src/compressiontube';
+import { Papa } from 'ngx-papaparse';
+
+import { CompressionTube } from 'src/app/compressiontube';
 import { Microwave } from './Microwave';
 import { PlotlyService } from 'angular-plotly.js';
 import { Shock } from './shock';
-import { FormsModule } from '@angular/forms';
+import { SettingService } from './setting.service';
+import { Observable } from 'rxjs';
+import { CompService } from './comp.service';
+import { MicroService } from './micro.service';
+import { ShockService } from './shock.service';
 
 @Component({
   selector: 'app-root',
@@ -16,15 +20,8 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./app.component.css'],
 })
 
-export class AppComponent{
-  public df : dfd.DataFrame = new dfd.DataFrame;
-  public shock : Shock | undefined = undefined;
-  public micro : Microwave | undefined = undefined;
-  public comp : CompressionTube | undefined = undefined;
-  public filename = ""
-  public CHs :string[] = [];
-  pressureSelected = {compression: "CH1-1[V]", m1:"CH2-1[V]", m2:"CH3-1[V]", l1:"CH4-1[V]",l2:"CH5-1[V]"};
-  microSelected = {pI:"CH6-1[V]",pQ:"CH6-2[V]",rI:"CH7-1[V]",rQ:"CH7-2[V]"};
+export class AppComponent implements OnInit{
+  CHBind$ : Observable<any> | undefined ;
 
   graph = {
     data : [
@@ -69,8 +66,10 @@ export class AppComponent{
     }
   }
 
-  constructor(private dialog : MatDialog, private papa: Papa, private plotlyService : PlotlyService){
-    const Plotly = plotlyService.getPlotly();
+  constructor(private dialog : MatDialog, private papa: Papa, public settingService: SettingService, public compService : CompService, public microService : MicroService, public shockService : ShockService){ }
+  ngOnInit(){
+    this.CHBind$ = this.settingService.getCHBind();
+    this.CHBind$.subscribe((value) => {this.CalcData(value)});
   }
 
   openErrorDialog(errorMessage: string): void{
@@ -79,161 +78,87 @@ export class AppComponent{
       data: errorMessage 
     });
   }
+  CalcData(bind : any){
+    if(this.settingService.getDataFrame() == undefined){
+      return;
+    }
+    this.compService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", bind.compression]}));
+    this.microService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", bind.rI, bind.rQ]}));
+    this.shockService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", bind.m1, bind.m2, bind.l1, bind.l2]}));
+    if(this.microService.IQ == undefined || this.shockService.P == undefined|| this.compService.Pc == undefined){
+      console.log("データがありません");
+      return;
+    }
 
-  onSelectionChanged(event: any){
-    this.comp = new CompressionTube(this.df.loc({columns: ["時間[s]", this.pressureSelected.compression]}));
-    this.micro = new Microwave(this.df.loc({columns: ["時間[s]", this.microSelected.rI, this.microSelected.rQ]}));
-    this.shock = new Shock(this.df.loc({columns: ["時間[s]", this.pressureSelected.m1, this.pressureSelected.m2, this.pressureSelected.l1, this.pressureSelected.l2]}));
-
-    const new_df = this.df.setIndex({ column: "時間[s]", drop: true }); //resets the index to Date column
+    const new_df = this.settingService.getDataFrame().setIndex({ column: "時間[s]", drop: true }); //resets the index to Date column
     new_df.head().print() //
-    const t = this.df["時間[s]"].values;
+    const t = this.settingService.getDataFrame()["時間[s]"].values;
     this.graph.data = [
       {
         x: t,
-        y: this.comp.Pc["Pc"].values,
+        y: this.compService.Pc["Pc"].values,
         name:"圧縮",
         mode:'lines',
         yaxis:"y1"
       },
       {
         x: t,
-        y: this.df[this.pressureSelected.m1].values,
+        y: this.settingService.getDataFrame()[bind.m1].values,
         name:"中1",
         mode:"lines",
         yaxis:"y2"
       },
       {
         x: t,
-        y: this.df[this.pressureSelected.m2].values,
+        y: this.settingService.getDataFrame()[bind.m2].values,
         name:"中2",
         mode:"lines",
         yaxis:"y2"
       },
       {
         x: t,
-        y: this.df[this.pressureSelected.l1].values,
+        y: this.settingService.getDataFrame()[bind.l1].values,
         name:"低1",
         mode:"lines",
         yaxis:"y2"
       },
       {
         x: t,
-        y: this.df[this.pressureSelected.l2].values,
+        y: this.settingService.getDataFrame()[bind.l2].values,
         name:"低2",
         mode:"lines",
         yaxis:"y2"
       },
       {
         x: t,
-        y: this.micro.IQ["P"].values,
+        y: this.microService.IQ["P"].values,
         name:"Power",
         mode:"lines",
         yaxis:"y3"
       },
     ];
 
+    //display test condition
+    
     //display csv as table
-    this.micro.IQ.plot("tableCalced").table({
+    this.microService.IQ.plot("tableCalced").table({
     layout: {
       title:"Calc data",
       font: {family: "Times new Roman", size: 10.5, color: "#000" },
       width: 1600, height:1000}
     });
     //display csv as table
-    this.df.plot("table").table({
+    this.settingService.getDataFrame().plot("table").table({
     layout: {
       title:"HIOKI data",
       font: {family: "Times new Roman", size: 10.5, color: "#000" },
       width: 1600, height:1000}
     });
   }
-  readExcelFile(file : string) {
-    const workbook = XLSX.readFile(file);
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    return jsonData;
-  }
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    this.filename = file.name;
-
-    if(!file){
-      console.log("読み込みエラー" + event.error);
-      this.openErrorDialog("読み込みエラー");
-    }
-
-    if(file.name.endsWith(".csv")){
-      console.log("csvを読み込んだ" + file.name);
-      const reader = new FileReader();
-      let text ="";
-      reader.onload = (ev) => {
-        text = ev.target?.result as string; 
-        this.ReadCsv(text);
-      }
-      reader.readAsText(file, "Shift-JIS");
-      const nameparts = file.name.split("_");
-      const excelPartName = "20" + nameparts[1].slice(0, 2) + "_" + nameparts[1].slice(2) + "_" + nameparts[0].slice(0, 4);
-      console.log(excelPartName);
-
-      const jsonData = this.readExcelFile("./ShockTube結果.xlsx");
-      console.log(jsonData); // 読み込んだExcelデータをコンソールに表示する例
-    }
-    else if (file.name.endsWith(".MEM")){
-      console.log("MEMを読み込んだ" + file.name);
-    }
-  }
-
-  oncomplete =(results : ParseResult<any>) =>{
-    if(results.errors)console.log(results.errors)
-    console.log(results.data);
-    this.df = new dfd.DataFrame(results.data);
-    //最終行に余分な公があるので削る
-    this.df.drop({index: [this.df.shape[0] -1], inplace:true})
-    
-    //メニューにchを登録
-    this.CHs=this.df.columns;
-    this.onSelectionChanged("");
-  }
-  DownloadExcel(){
-    const wb = XLSX.utils.book_new();
-    if(this.comp == undefined || this.micro == undefined || this.shock == undefined){
-      this.openErrorDialog("衝撃波速度を計算してください");
-      return;
-    }
-    this.comp.write(wb);
-    this.micro.write(wb);
-    this.shock.write(wb);
-    const wbout = XLSX.write(wb, {bookType: "xlsx", type:"array"});
-    const blob = new Blob([wbout], { type: 'application/octet-stream' });
-
-    // ダウンロード用のURLを生成
-    const url = URL.createObjectURL(blob);
-
-    // リンクを生成し、ダウンロードさせる
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = this.filename.slice(0, -11) + ".xlsx";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-  async ReadCsv(text: string){
-    console.log(text)
-    const editedtext = text.replaceAll("\+", "");
-    // 修正されたテキストをBlobに変換する
-    this.papa.parse(new Blob([editedtext]), {
-        header: true,
-        dynamicTyping:true,
-        worker:true,
-        complete : this.oncomplete
-      }
-    );
-  }
   onPlotlyClick(event :any){
     console.log(event.points[0]);
     if(1 <= event.points[0].curveNumber && event.points[0].curveNumber <= 4){
-      this.shock?.onPlotClick(event.points[0]);
+      this.shockService.onPlotClick(event.points[0]);
     }
   }
 }
