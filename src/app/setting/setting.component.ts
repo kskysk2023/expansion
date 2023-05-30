@@ -6,18 +6,27 @@ import * as dfd from 'danfojs';
 import { CompService } from '../comp.service';
 import { MicroService } from '../micro.service';
 import { ShockService } from '../shock.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-setting',
   templateUrl: './setting.component.html',
-  styleUrls: ['./setting.component.css']
+  styleUrls: ['./setting.component.css'],
 })
 export class SettingComponent implements OnInit {
-  onSelectionChanged(arg0: string) {
-    console.log(arg0);
+  [x: string]: any;
+  stepOneForm = this.formBuilder.group({
+    firstCtrl: ['', Validators.required]
+  });
+  bind = {
+    compression: "CH1-1[V]", m1: "CH2-1[V]", m2: "CH3-1[V]", l1: "CH4-1[V]", l2: "CH5-1[V]",
+    pI: "CH6-1[V]", pQ: "CH6-2[V]", rI: "CH7-1[V]", rQ: "CH7-2[V]"
   }
 
-  constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, public microService : MicroService, public shockService : ShockService){}
+  constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, private formBuilder: FormBuilder,
+              public microService : MicroService, public shockService : ShockService){
+
+  }
   ngOnInit(): void { }
   readExcelFile(file : string) {
     const workbook = XLSX.readFile(file);
@@ -37,10 +46,11 @@ export class SettingComponent implements OnInit {
     //メニューにchを登録
     this.settingService.setMenuCH(df.columns);
     this.settingService.df = df;
+    //app componentにデータを更新させるために疑似的に選択が変わったとする
+    this.settingService.updateCHBindProperty(this.bind);
   }
-  onSelectedChanged(event : any){
-    console.log(event, event.source.tabIndex)
-    this.settingService.CHBind;
+  onSelectedChanged(){
+    this.settingService.updateCHBindProperty(this.bind);
   }
   async ReadCsv(text: string){
     const editedtext = text.replaceAll("\+", "");

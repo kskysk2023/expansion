@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs/internal/observable/of';
 import * as dfd from 'danfojs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SettingService {
-  CHBind = {
-    compression: "CH1-1[V]", m1:"CH2-1[V]", m2:"CH3-1[V]", l1:"CH4-1[V]",l2:"CH5-1[V]",
-    pI:"CH6-1[V]",pQ:"CH6-2[V]",rI:"CH7-1[V]",rQ:"CH7-2[V]"};
+  private CHBindSubject = new BehaviorSubject<any>({});
+
+  CHBind$ = this.CHBindSubject.asObservable();
+
   filename = "";
   excelPartName = "";
   public CHs :string[] = [];
@@ -16,8 +18,12 @@ export class SettingService {
 
   constructor() { }
   getDataFrame(){return this.df;}
-  getCHBind() {return of(this.CHBind);}
-  getCH(){return this.CHBind;}
+
+  updateCHBindProperty(bind: any) {
+    this.CHBindSubject.next(bind);
+  }
+  getCHBind() {return this.CHBind$;}
+  getCH(){return this.CHBindSubject.value;}
 
   getOoutFileName(){
     return this.filename.slice(0, -11) + ".xlsx";

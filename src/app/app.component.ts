@@ -69,7 +69,9 @@ export class AppComponent implements OnInit{
   constructor(private dialog : MatDialog, private papa: Papa, public settingService: SettingService, public compService : CompService, public microService : MicroService, public shockService : ShockService){ }
   ngOnInit(){
     this.CHBind$ = this.settingService.getCHBind();
-    this.CHBind$.subscribe((value) => {this.CalcData(value)});
+    this.CHBind$.subscribe((value) => {
+      console.log("obsever recieve")
+      this.CalcData(value)});
   }
 
   openErrorDialog(errorMessage: string): void{
@@ -79,6 +81,7 @@ export class AppComponent implements OnInit{
     });
   }
   CalcData(bind : any){
+    console.log("set data")
     if(this.settingService.getDataFrame().shape[1] < 4){
       return;
     }

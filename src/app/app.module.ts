@@ -13,6 +13,10 @@ import {MatCardModule} from '@angular/material/card';
 import {MatSelectModule} from "@angular/material/select"
 import {MatGridListModule, MatGridTile} from "@angular/material/grid-list";
 import { SettingComponent } from './setting/setting.component'
+import {MatStepperModule} from '@angular/material/stepper';
+import { CommonModule } from '@angular/common';
+import {MatToolbarModule} from '@angular/material/toolbar'; 
+import { ReactiveFormsModule } from '@angular/forms';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -31,9 +35,15 @@ PlotlyModule.plotlyjs = PlotlyJS;
     PlotlyModule,
     MatIconModule,
     MatSelectModule,
+    MatStepperModule,
+    CommonModule,
+    MatToolbarModule,
+    ReactiveFormsModule,
     //NgChartsModule,
-
     MatGridListModule
+  ],
+  exports: [
+    MatStepperModule
   ],
   providers: [],
   bootstrap: [AppComponent]

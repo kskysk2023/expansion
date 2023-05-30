@@ -1,8 +1,5 @@
 .content {
-display: grid;
-grid-template-rows: 200px 200px;
-grid-template-columns: 300px 1fr;
-margin: 82px auto 32px;
+margin: 10px;
 padding: 0 16px;
 }
 .file{
