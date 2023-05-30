@@ -14,11 +14,9 @@ import { ShockService } from '../shock.service';
 })
 export class SettingComponent implements OnInit {
   onSelectionChanged(arg0: string) {
-    throw new Error('Method not implemented.');
+    console.log(arg0);
   }
-  comp: undefined;
-  micro: undefined;
-  shock: undefined;
+
   constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, public microService : MicroService, public shockService : ShockService){}
   ngOnInit(): void { }
   readExcelFile(file : string) {
@@ -84,10 +82,7 @@ export class SettingComponent implements OnInit {
   }
   DownloadExcel(){
     const wb = XLSX.utils.book_new();
-    if(this.comp == undefined || this.micro == undefined || this.shock == undefined){
-      this.openErrorDialog("衝撃波速度を計算してください");
-      return;
-    }
+
     this.compService.write(wb);
     this.microService.write(wb);
     this.shockService.write(wb);

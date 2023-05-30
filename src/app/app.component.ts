@@ -79,7 +79,7 @@ export class AppComponent implements OnInit{
     });
   }
   CalcData(bind : any){
-    if(this.settingService.getDataFrame() == undefined){
+    if(this.settingService.getDataFrame().shape[1] < 4){
       return;
     }
     this.compService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", bind.compression]}));
