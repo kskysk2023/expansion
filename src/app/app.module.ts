@@ -17,6 +17,7 @@ import {MatStepperModule} from '@angular/material/stepper';
 import { CommonModule } from '@angular/common';
 import {MatToolbarModule} from '@angular/material/toolbar'; 
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatTableModule } from '@angular/material/table';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -39,6 +40,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     CommonModule,
     MatToolbarModule,
     ReactiveFormsModule,
+    MatTableModule,
     //NgChartsModule,
     MatGridListModule
   ],

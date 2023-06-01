@@ -22,7 +22,8 @@ import { ShockService } from './shock.service';
 
 export class AppComponent implements OnInit{
   CHBind$ : Observable<any> | undefined ;
-
+  displayedColumns: string[] = ['name', 'value'];
+  dataSource : [{name: string, value : number}] | undefined;
   graph = {
     data : [
       { x: [0], y: [0], mode: 'scatter', yaxis:"y1" ,name:""},
@@ -142,6 +143,10 @@ export class AppComponent implements OnInit{
     ];
 
     //display test condition
+    this.dataSource = [{name:"P0", value:100}];
+    this.shockService.getVelocity().forEach((value, index) =>{
+      this.dataSource?.push({name: "V" + index.toString(), value: value});
+    });
     
     //display csv as table
     this.microService.IQ.plot("tableCalced").table({
