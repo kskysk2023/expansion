@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as dfd from 'danfojs';
 import * as XLSX from 'xlsx';
+import { rowData } from './app.component';
 @Injectable({
   providedIn: 'root'
 })
@@ -23,6 +24,8 @@ export class CompService {
   private H_end_row: number = 0;
   private t_hold_start: number = 0;
   private t_hold_end: number = 0;
+  calcData :rowData[] = [];
+  data : {[key : string]: {value: number, unit : string}} = {};
 
   constructor() { }
   SetData(V_Pc:dfd.DataFrame){
@@ -50,6 +53,31 @@ export class CompService {
     this.t_hold_start = this.senkeiKinjix(this.Pc["t"].iat(this.PrIndex - 1), this.Pc["t"].iat(this.PrIndex), this.Pc["Pc"].iat(this.PrIndex - 1), this.Pc["Pc"].iat(this.PrIndex), this.Pr);
     this.t_hold_end = this.senkeiKinjix(this.Pc["t"].iat(this.H_end_row - 1), this.Pc["t"].iat(this.H_end_row), this.Pc["Pc"].iat(this.H_end_row - 1), this.Pc["Pc"].iat(this.H_end_row), this.Pr);
     console.log("construct compressiontube ... "+ this.Pmax, this.Pr, this.PrIndex, this.H_end_row, this.t_hold_start, this.t_hold_end)
+
+    this.Pc.addColumn("tm", this.Pc["t"].mul(1000), {inplace:true});
+
+    this.data["k"] = {value: 1.67, unit: "-" } // 1
+    this.data["kR"] = {value: 1.4, unit:"-"}
+    this.data["T0"] = {value: 300 , unit: "K" }
+    this.data["Pc0"] = {value: 101.3 , unit: "kPa" }
+    this.data["D*"] =  {value: 15, unit: "mm"  } // 5
+    this.data["Dc"] =  {value: 50, unit: "mm"  }
+    this.data["Lc"] = {value: 2, unit: "m"  }
+    this.data ["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/4*this.data["T0"].value), unit: "m/s"  }
+    this.data ["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/28.8*this.data["T0"].value), unit: "m/s"  }
+    this.data ["alpha"] = {value: (this.data["D*"].value^2*this.data["a0"].value)/(this.data["Dc"].value^2**this.data["aR0"].value), unit: "-"  } // 10
+    this.data  ["V0 m3"] = {value: { "f": "=PI()/4*(F6*10^-3)^2*F7" }, unit: ""  }
+    this.data ["Wp kg"] = {value: 0.28, unit: ""  }
+    this.data   ["omega"] = {value: { "f": "=SQRT(2*(F1-1)*((F1+1)/2)^((F1+1)/(F1-1))*F4*10^3*F11/(F12*F10^2*F9^2))" }, unit: ""  }
+    this.data   ["PcMax, MPa"] = {value: this.Pmax, unit: ""  }
+    this.data  ["tMax, s"] = {value: this.Pc["t"].iloc(this.Pc["Pc"].eq(this.Pmax)).values[0], unit: ""  } // 15
+    this.data  ["Pr, MPa"] = {value: this.Pr, unit: ""  }
+    this.data  ["tr, s"] = {value: this.t_hold_start, unit: ""  }
+    this.data  ["Tr, K"] = {value: { "f": "=F3*((F4*10^3)/(F16*10^6))^((1-F1)/F1)" }, unit: ""  }
+    this.data  ["ar, m/s"] = {value: { "f": "=SQRT(F1*8314.3/4*F18)" }, unit: ""  }
+    this.data  ["UR, m/s"] = {value: { "f": "=(2/(F1+1))^((F1+1)/(2*(F1-1)))*F5^2/F6^2*F19" }, unit: ""  }// 20
+    this.data   ["holding time end, s"] = {value: this.t_hold_end, unit: ""  }
+    this.data  ["Holding Time, us"] =  { value: { "f": "=(F21 - F17) * 10^6" }, unit: ""  }
   }
 
   public write(wb: any): void {
@@ -60,15 +88,14 @@ export class CompService {
     const pcRow = "'data'!C1:'data'!C8002";
     const tRow = "'data'!A1:'data'!A8002";
 
-    const tm : dfd.Series = this.Pc["t"].mul(1000);
-    var d : dfd.DataFrame = new dfd.DataFrame([this.Pc["t"].values, tm.values, this.Pc["Pc"].values]).transpose();
-
+    var d : dfd.DataFrame = new dfd.DataFrame([this.Pc["t"].values, this.Pc["tm"].values, this.Pc["Pc"].values]).transpose();
     d.tail().print()
     const table1Data = [
       ["t", "t", "Pc"],
       ["s", "ms", "MPa"],
       ...d.values
     ];
+
     const ws = XLSX.utils.json_to_sheet(table1Data, {skipHeader:true})
 
     const row = "B"

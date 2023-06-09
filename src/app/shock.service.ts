@@ -30,12 +30,19 @@ export class ShockService {
   }
 
   public onPlotClick(plot: any){
+    //立ち上がりの時刻を代入
     this.calcData[plot.curveNumber - 1] = {name: "t_P" + (plot.curveNumber).toString(), value: plot.x, unit:"s"};
-    
+    //時間差を計算
+    this.calcData[4] = {name: "t12", value: (this.calcData[1].value - this.calcData[0].value), unit:"s"};
+    this.calcData[5] ={name : "t23", value: (this.calcData[2].value - this.calcData[1].value), unit: "s"};
+    this.calcData[6] ={name : "t34", value: (this.calcData[3].value - this.calcData[2].value), unit: "s"}; 
+
     //Vの行は4行めから
-    this.calcData[4] ={name : "V12", value: 0.5/(this.calcData[1].value - this.calcData[0].value), unit: "m/s"};
-    this.calcData[5] ={name : "V23", value: 1.17/(this.calcData[2].value - this.calcData[1].value), unit: "m/s"};
-    this.calcData[6] ={name : "V34", value: 0.5/(this.calcData[3].value - this.calcData[2].value), unit: "m/s"}; 
+    this.calcData[7] ={name : "V12", value: 0.5/this.calcData[4].value, unit: "m/s"};
+    this.calcData[8] ={name : "V23", value: 1.17/this.calcData[5].value, unit: "m/s"};
+    this.calcData[9] ={name : "V34", value: 0.5/this.calcData[6].value, unit: "m/s"}; 
+
+    console.log("shock data...." , this.calcData)
   }
 
   public getVelocity() : any{
@@ -50,16 +57,13 @@ export class ShockService {
       console.log("SetDataが呼ばれていない");
       return;
     }
-    const table1Data = [
-      this.calcData.slice(0, 4)
+    const t = [
+      this.calcData.map((value) => value.name),
+      this.calcData.map((value) => value.unit),
+      this.calcData.map((value) => value.value)
     ];
-    const ws = XLSX.utils.json_to_sheet(table1Data, {skipHeader:true})
-
-    XLSX.utils.sheet_add_json(ws,[
-        ["V12", "V23", "V34"],
-        ["m/s", "m/s", "m/s"],
-        ...this.getVelocity()
-    ], {skipHeader:true, origin:"F1"});
+    console.log(t);
+    const ws = XLSX.utils.json_to_sheet(t, {skipHeader:true});
 
     XLSX.utils.book_append_sheet(wb, ws, 'shock');
   }

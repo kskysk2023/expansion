@@ -67,4 +67,13 @@
         </mat-select>
       </mat-form-field>
     </mat-step>
+
+    <mat-step label="ダウンロード">
+      <form>
+        <p>Download</p>
+        <button mat-icon-button (click)="DownloadExcel($event)">
+          <mat-icon>download</mat-icon>
+        </button>
+      </form>
+    </mat-step>
 </mat-horizontal-stepper>

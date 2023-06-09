@@ -112,7 +112,7 @@ export class SettingComponent implements OnInit {
       console.log("MEMを読み込んだ" + file.name);
     }
   }
-  DownloadExcel(){
+  DownloadExcel(event : Event){
     const wb = XLSX.utils.book_new();
 
     this.compService.write(wb);
@@ -125,6 +125,7 @@ export class SettingComponent implements OnInit {
     const url = URL.createObjectURL(blob);
 
     // リンクを生成し、ダウンロードさせる
+    event.preventDefault();
     const a = document.createElement('a');
     a.href = url;
     a.download = this.settingService.getOoutFileName();
