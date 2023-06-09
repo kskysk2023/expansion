@@ -18,6 +18,7 @@ import { CommonModule } from '@angular/common';
 import {MatToolbarModule} from '@angular/material/toolbar'; 
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
+import {ProgressBarMode, MatProgressBarModule} from '@angular/material/progress-bar';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -42,7 +43,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     ReactiveFormsModule,
     MatTableModule,
     //NgChartsModule,
-    MatGridListModule
+    MatGridListModule,
+    MatProgressBarModule,
   ],
   exports: [
     MatStepperModule
