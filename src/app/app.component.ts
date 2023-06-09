@@ -1,18 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
 import * as dfd from 'danfojs';
 import { Papa } from 'ngx-papaparse';
 
-import { CompressionTube } from 'src/app/compressiontube';
-import { Microwave } from './Microwave';
 import { PlotlyService } from 'angular-plotly.js';
-import { Shock } from './shock';
 import { SettingService } from './setting.service';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { CompService } from './comp.service';
 import { MicroService } from './micro.service';
 import { ShockService } from './shock.service';
+import { MatTable } from '@angular/material/table';
+export interface rowData {
+  name : string;
+  value : number;
+  unit : string;
+};
 
 @Component({
   selector: 'app-root',
@@ -22,8 +25,11 @@ import { ShockService } from './shock.service';
 
 export class AppComponent implements OnInit{
   CHBind$ : Observable<any> | undefined ;
-  displayedColumns: string[] = ['name', 'value'];
-  dataSource : [{name: string, value : number}] | undefined;
+
+  displayedColumns: string[] = ['name', 'value', 'unit'];
+  dataToDisplay : rowData[] = [{name : "P0", value:100, unit: "kPa"}];
+  dataSource = new ReplaySubject<rowData[]>;
+
   graph = {
     data : [
       { x: [0], y: [0], mode: 'scatter', yaxis:"y1" ,name:""},
@@ -67,7 +73,9 @@ export class AppComponent implements OnInit{
     }
   }
 
-  constructor(private dialog : MatDialog, private papa: Papa, public settingService: SettingService, public compService : CompService, public microService : MicroService, public shockService : ShockService){ }
+  constructor(private dialog : MatDialog, private papa: Papa, public settingService: SettingService,
+              public compService : CompService, public microService : MicroService, public shockService : ShockService){
+  }
   ngOnInit(){
     this.CHBind$ = this.settingService.getCHBind();
     this.CHBind$.subscribe((value) => {
@@ -143,11 +151,8 @@ export class AppComponent implements OnInit{
     ];
 
     //display test condition
-    this.dataSource = [{name:"P0", value:100}];
-    this.shockService.getVelocity().forEach((value, index) =>{
-      this.dataSource?.push({name: "V" + index.toString(), value: value});
-    });
-    
+    this.dataSource.next(this.dataToDisplay);
+      
     //display csv as table
     this.microService.IQ.plot("tableCalced").table({
     layout: {
@@ -167,6 +172,9 @@ export class AppComponent implements OnInit{
     console.log(event.points[0]);
     if(1 <= event.points[0].curveNumber && event.points[0].curveNumber <= 4){
       this.shockService.onPlotClick(event.points[0]);
+      this.dataToDisplay.splice(1, 7, ...this.shockService.getData());
     }
+    
+    this.dataSource.next(this.dataToDisplay);
   }
 }

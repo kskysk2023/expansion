@@ -15,6 +15,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class SettingComponent implements OnInit {
   [x: string]: any;
+  progressValue=0;
   stepOneForm = this.formBuilder.group({
     firstCtrl: ['', Validators.required]
   });
@@ -39,22 +40,37 @@ export class SettingComponent implements OnInit {
   oncomplete =(results : ParseResult<any>) =>{
     if(results.errors)console.log(results.errors)
     console.log(results.data);
+    this.progressValue = 60;
+
     const df = new dfd.DataFrame(results.data);
     //最終行に余分な公があるので削る
     df.drop({index: [df.shape[0] -1], inplace:true})
+    
     df.print()
+    this.progressValue = 70;
+
     //メニューにchを登録
     this.settingService.setMenuCH(df.columns);
     this.settingService.df = df;
+
+    this.progressValue = 80;
+
     //app componentにデータを更新させるために疑似的に選択が変わったとする
     this.settingService.updateCHBindProperty(this.bind);
+
+    //読み込み終わったら進捗を100％にする
+    this.progressValue = 100;
   }
+
   onSelectedChanged(){
     this.settingService.updateCHBindProperty(this.bind);
   }
+
   async ReadCsv(text: string){
     const editedtext = text.replaceAll("\+", "");
-    console.log(editedtext)
+    console.log(editedtext);
+    this.progressValue = 40;
+
     // 修正されたテキストをBlobに変換する
     this.papa.parse(new Blob([editedtext]), {
         header: true,
@@ -66,6 +82,10 @@ export class SettingComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
+    //まずプログレスバーを動かす
+    console.log("ファイルが選択された");
+    this.progressValue = 1;
+
     const file: File = event.target.files[0];
     this.settingService.setFileName(file.name);
 
@@ -75,6 +95,8 @@ export class SettingComponent implements OnInit {
 
     if(file.name.endsWith(".csv")){
       console.log("csvを読み込んだ" + file.name);
+      this.progressValue = 20;
+
       const reader = new FileReader();
       let text ="";
       reader.onload = (ev) => {
