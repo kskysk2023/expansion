@@ -40,6 +40,7 @@
         </mat-select>
       </mat-form-field>
     </mat-step>
+
     <mat-step label="マイクロ波のCHを割り当て">
       <mat-form-field>
         <mat-label>ピストンI</mat-label>
@@ -65,5 +66,15 @@
           <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
+    </mat-step>
+
+    <mat-step label="ダウンロ―ド">
+      <!-- Step 4のコンテンツ -->
+      <p>ファイルをダウンロード</p>
+      <button mat-icon-button matTooltip="Basic" aria-label="Download excel file" (click)="DownloadExcel()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+          <path d="M220-160q-24 0-42-18t-18-42v-143h60v143h520v-143h60v143q0 24-18 42t-42 18H220Zm260-153L287-506l43-43 120 120v-371h60v371l120-120 43 43-193 193Z"/>
+        </svg>
+      </button>
     </mat-step>
 </mat-horizontal-stepper>
