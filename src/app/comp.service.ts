@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import * as dfd from 'danfojs';
 import * as XLSX from 'xlsx';
 import { rowData } from './app.component';
+import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
 @Injectable({
   providedIn: 'root'
 })
@@ -25,6 +26,7 @@ export class CompService {
   private t_hold_start: number = 0;
   private t_hold_end: number = 0;
   calcData :rowData[] = [];
+  dataComp = new ReplaySubject<rowData[]>;
   data : {[key : string]: {value: number, unit : string}} = {};
 
   constructor() { }
@@ -78,6 +80,11 @@ export class CompService {
     this.data["UR"] = {value: (2/(this.data["k"].value+1))**((this.data["k"].value+1)/(2*(this.data["k"].value-1)))*this.data["D*"].value**2/this.data["Dc"].value**2*this.data["ar"].value , unit: "m/s"  }// 20
     this.data["holding time end"] = {value: this.t_hold_end, unit: "s"  }
     this.data["Holding Time"] =  { value: (this.data["holding time end"].value - this.data["tr"].value) * 10**6, unit: "us"  }
+
+    this.dataComp.next(this.getData());
+  }
+  public getDataSource(){
+    return this.dataComp;
   }
   public getData() : rowData[]{
     return Object.keys(this.data).map((key) => {

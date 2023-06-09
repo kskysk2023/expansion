@@ -26,6 +26,7 @@
     "assert": "^2.0.0",
     "chart.js": "^4.3.0",
     "chartjs-plugin-annotation": "^3.0.1",
+    "component": "^1.1.0",
     "crypto-browserify": "^3.12.0",
     "danfojs": "^1.1.2",
     "encoding-japanese": "^2.0.0",

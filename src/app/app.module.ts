@@ -19,6 +19,8 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import {ProgressBarMode, MatProgressBarModule} from '@angular/material/progress-bar';
+import { ShockComponent } from './shock/shock.component';
+import { CompComponent } from './comp/comp.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -26,7 +28,9 @@ PlotlyModule.plotlyjs = PlotlyJS;
   declarations: [
     AppComponent,
     ErrorDialogComponent,
-    SettingComponent
+    SettingComponent,
+    ShockComponent,
+    CompComponent
   ],
   imports: [
     BrowserModule,

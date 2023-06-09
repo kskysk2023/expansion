@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import * as dfd from 'danfojs';
 import * as XLSX from 'xlsx';
 import { rowData } from './app.component';
+import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,8 @@ export class ShockService {
     return x;
   }
   public P: dfd.DataFrame | undefined;
-  calcData :rowData[] = [];
+  public calcData :rowData[] = [];
+  dataShock = new ReplaySubject<rowData[]>;
 
   constructor() { }
   SetData(V_P:dfd.DataFrame){
@@ -43,13 +45,14 @@ export class ShockService {
     this.calcData[9] ={name : "V34", value: 0.5/this.calcData[6].value, unit: "m/s"}; 
 
     console.log("shock data...." , this.calcData)
+    this.dataShock.next(this.calcData);
   }
 
   public getVelocity() : any{
     return this.calcData.slice(4, 6);
   }
   public getData() {
-    return this.calcData;
+    return this.dataShock;
   }
 
   public write(wb: any): void {
