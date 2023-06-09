@@ -27,7 +27,7 @@ export class AppComponent implements OnInit{
   CHBind$ : Observable<any> | undefined ;
 
   displayedColumns: string[] = ['name', 'value', 'unit'];
-  dataToDisplay : rowData[] = [{name : "P0", value:100, unit: "kPa"}];
+  dataToDisplay : rowData[] = [];
   dataSource = new ReplaySubject<rowData[]>;
 
   graph = {
@@ -151,7 +151,7 @@ export class AppComponent implements OnInit{
     ];
 
     //display test condition
-    this.dataSource.next(this.dataToDisplay);
+    this.loadTable()
       
     //display csv as table
     this.microService.IQ.plot("tableCalced").table({
@@ -168,13 +168,14 @@ export class AppComponent implements OnInit{
       width: 1600, height:1000}
     });
   }
+  loadTable(){
+    this.dataSource.next(this.shockService.getData().concat(this.compService.getData()));
+  }
   onPlotlyClick(event :any){
     console.log(event.points[0]);
     if(1 <= event.points[0].curveNumber && event.points[0].curveNumber <= 4){
       this.shockService.onPlotClick(event.points[0]);
-      this.dataToDisplay.splice(1, 7, ...this.shockService.getData());
     }
-    
-    this.dataSource.next(this.dataToDisplay);
+    this.loadTable();
   }
 }

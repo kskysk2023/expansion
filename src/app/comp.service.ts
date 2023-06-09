@@ -65,21 +65,29 @@ export class CompService {
     this.data["Lc"] = {value: 2, unit: "m"  }
     this.data["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/4*this.data["T0"].value), unit: "m/s"  }
     this.data["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/28.8*this.data["T0"].value), unit: "m/s"  }
-    this.data["alpha"] = {value: (this.data["D*"].value^2*this.data["a0"].value)/(this.data["Dc"].value^2**this.data["aR0"].value), unit: "-"  } // 10
-    this.data["V0"] = {value: Math.PI/4*(this.data["Dc"].value*10^-3)^2*this.data["Lc"].value, unit: "m3"  }
+    this.data["alpha"] = {value: (this.data["D*"].value**2*this.data["a0"].value)/(this.data["Dc"].value**2*this.data["aR0"].value), unit: "-"  } // 10
+    this.data["V0"] = {value: Math.PI/4*(this.data["Dc"].value*10**-3)**2*this.data["Lc"].value, unit: "m3"  }
     this.data["Wp"] = {value: 0.28, unit: "kg"}
-    this.data["omega"] = {value: Math.sqrt((2*(this.data["k"].value-1)*((this.data["k"].value+1)/2)^((this.data["k"].value+1)/(this.data["k"].value-1))*this.data["Pc0"].value*10^3*this.data["V0"].value/(this.data["Wp"].value*this.data["alpha"].value^2*this.data["aR0"].value^2))), unit: "-"  }
+    this.data["omega"] = {value: Math.sqrt((2*(this.data["k"].value-1)*((this.data["k"].value+1)/2)**((this.data["k"].value+1)/(this.data["k"].value-1))*this.data["Pc0"].value*10**3*this.data["V0"].value/(this.data["Wp"].value*this.data["alpha"].value**2*this.data["aR0"].value**2))), unit: "-"  }
     this.data["PcMax"] = {value: this.Pmax, unit: "MPa"  }
     this.data["tMax"] = {value: this.Pc["t"].iloc(this.Pc["Pc"].eq(this.Pmax)).values[0], unit: "s"  } // 15
     this.data["Pr"] = {value: this.Pr, unit: "MPa"  }
     this.data["tr"] = {value: this.t_hold_start, unit: "s"  }
-    this.data["Tr"] = {value: this.data["T0"].value*((this.data["k"].value*10^3)/(this.data["Pr"].value*10^6))^((1-this.data["k"].value)/this.data["k"].value), unit: "K"  }
+    this.data["Tr"] = {value: this.data["T0"].value*((this.data["Pc0"].value*10**3)/(this.data["Pr"].value*10**6))**((1-this.data["k"].value)/this.data["k"].value), unit: "K"  }
     this.data["ar"] = {value: Math.sqrt(this.data["k"].value*8314.3/4*this.data["Tr"].value), unit: "m/s"  }
-    this.data["UR"] = {value: (2/(this.data["k"].value+1))^((this.data["k"].value+1)/(2*(this.data["k"].value-1)))*this.data["D*"].value^2/this.data["Dc"].value^2*this.data["ar"].value , unit: "m/s"  }// 20
+    this.data["UR"] = {value: (2/(this.data["k"].value+1))**((this.data["k"].value+1)/(2*(this.data["k"].value-1)))*this.data["D*"].value**2/this.data["Dc"].value**2*this.data["ar"].value , unit: "m/s"  }// 20
     this.data["holding time end"] = {value: this.t_hold_end, unit: "s"  }
-    this.data["Holding Time"] =  { value: (this.data["holding time end"].value - this.data["tr"].value) * 10^6, unit: "us"  }
+    this.data["Holding Time"] =  { value: (this.data["holding time end"].value - this.data["tr"].value) * 10**6, unit: "us"  }
   }
-
+  public getData() : rowData[]{
+    return Object.keys(this.data).map((key) => {
+      return {
+        name: key,
+        value: this.data[key].value,
+        unit: this.data[key].unit,
+      };
+    })
+  }
   public write(wb: any): void {
     if(this.Pc == undefined){
       console.log("SetDataが呼ばれていない");
