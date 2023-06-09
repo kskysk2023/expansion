@@ -63,21 +63,21 @@ export class CompService {
     this.data["D*"] =  {value: 15, unit: "mm"  } // 5
     this.data["Dc"] =  {value: 50, unit: "mm"  }
     this.data["Lc"] = {value: 2, unit: "m"  }
-    this.data ["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/4*this.data["T0"].value), unit: "m/s"  }
-    this.data ["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/28.8*this.data["T0"].value), unit: "m/s"  }
-    this.data ["alpha"] = {value: (this.data["D*"].value^2*this.data["a0"].value)/(this.data["Dc"].value^2**this.data["aR0"].value), unit: "-"  } // 10
-    this.data  ["V0 m3"] = {value: { "f": "=PI()/4*(F6*10^-3)^2*F7" }, unit: ""  }
-    this.data ["Wp kg"] = {value: 0.28, unit: ""  }
-    this.data   ["omega"] = {value: { "f": "=SQRT(2*(F1-1)*((F1+1)/2)^((F1+1)/(F1-1))*F4*10^3*F11/(F12*F10^2*F9^2))" }, unit: ""  }
-    this.data   ["PcMax, MPa"] = {value: this.Pmax, unit: ""  }
-    this.data  ["tMax, s"] = {value: this.Pc["t"].iloc(this.Pc["Pc"].eq(this.Pmax)).values[0], unit: ""  } // 15
-    this.data  ["Pr, MPa"] = {value: this.Pr, unit: ""  }
-    this.data  ["tr, s"] = {value: this.t_hold_start, unit: ""  }
-    this.data  ["Tr, K"] = {value: { "f": "=F3*((F4*10^3)/(F16*10^6))^((1-F1)/F1)" }, unit: ""  }
-    this.data  ["ar, m/s"] = {value: { "f": "=SQRT(F1*8314.3/4*F18)" }, unit: ""  }
-    this.data  ["UR, m/s"] = {value: { "f": "=(2/(F1+1))^((F1+1)/(2*(F1-1)))*F5^2/F6^2*F19" }, unit: ""  }// 20
-    this.data   ["holding time end, s"] = {value: this.t_hold_end, unit: ""  }
-    this.data  ["Holding Time, us"] =  { value: { "f": "=(F21 - F17) * 10^6" }, unit: ""  }
+    this.data["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/4*this.data["T0"].value), unit: "m/s"  }
+    this.data["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/28.8*this.data["T0"].value), unit: "m/s"  }
+    this.data["alpha"] = {value: (this.data["D*"].value^2*this.data["a0"].value)/(this.data["Dc"].value^2**this.data["aR0"].value), unit: "-"  } // 10
+    this.data["V0"] = {value: Math.PI/4*(this.data["Dc"].value*10^-3)^2*this.data["Lc"].value, unit: "m3"  }
+    this.data["Wp"] = {value: 0.28, unit: "kg"}
+    this.data["omega"] = {value: Math.sqrt((2*(this.data["k"].value-1)*((this.data["k"].value+1)/2)^((this.data["k"].value+1)/(this.data["k"].value-1))*this.data["Pc0"].value*10^3*this.data["V0"].value/(this.data["Wp"].value*this.data["alpha"].value^2*this.data["aR0"].value^2))), unit: "-"  }
+    this.data["PcMax"] = {value: this.Pmax, unit: "MPa"  }
+    this.data["tMax"] = {value: this.Pc["t"].iloc(this.Pc["Pc"].eq(this.Pmax)).values[0], unit: "s"  } // 15
+    this.data["Pr"] = {value: this.Pr, unit: "MPa"  }
+    this.data["tr"] = {value: this.t_hold_start, unit: "s"  }
+    this.data["Tr"] = {value: this.data["T0"].value*((this.data["k"].value*10^3)/(this.data["Pr"].value*10^6))^((1-this.data["k"].value)/this.data["k"].value), unit: "K"  }
+    this.data["ar"] = {value: Math.sqrt(this.data["k"].value*8314.3/4*this.data["Tr"].value), unit: "m/s"  }
+    this.data["UR"] = {value: (2/(this.data["k"].value+1))^((this.data["k"].value+1)/(2*(this.data["k"].value-1)))*this.data["D*"].value^2/this.data["Dc"].value^2*this.data["ar"].value , unit: "m/s"  }// 20
+    this.data["holding time end"] = {value: this.t_hold_end, unit: "s"  }
+    this.data["Holding Time"] =  { value: (this.data["holding time end"].value - this.data["tr"].value) * 10^6, unit: "us"  }
   }
 
   public write(wb: any): void {
