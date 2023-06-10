@@ -6,7 +6,8 @@ import * as dfd from 'danfojs';
 import { CompService } from '../comp.service';
 import { MicroService } from '../micro.service';
 import { ShockService } from '../shock.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-setting',
@@ -25,16 +26,24 @@ export class SettingComponent implements OnInit {
   }
 
   constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, private formBuilder: FormBuilder,
-              public microService : MicroService, public shockService : ShockService){
+              public microService : MicroService, public shockService : ShockService, private http: HttpClient){
 
   }
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.readExcelFile("ShockTube.xlsx");
+  }
+
   readExcelFile(file : string) {
-    const workbook = XLSX.readFile(file);
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    return jsonData;
+    const url = `assets/${file}`; // ShockTube.xlsxのパスを指定
+    this.http.get(url, { responseType: 'blob' }).subscribe(response => {
+      const fileBlob = response as Blob;
+      const fileReader = new FileReader();
+      fileReader.onload = (e) => {
+        const data = new Uint8Array(fileReader.result as ArrayBuffer);
+        this.settingService.setExcelResult(data);
+      };
+      fileReader.readAsArrayBuffer(fileBlob);
+    });
   }
 
   oncomplete =(results : ParseResult<any>) =>{
@@ -58,6 +67,13 @@ export class SettingComponent implements OnInit {
     //app componentにデータを更新させるために疑似的に選択が変わったとする
     this.settingService.updateCHBindProperty(this.bind);
 
+    //ガスと圧力をShockTube結果から読み込む
+    const bind = this.settingService.getResult();
+    if(bind != undefined){
+      this.compService.bind = bind;
+      this.compService.setCondition();
+    }
+        
     //読み込み終わったら進捗を100％にする
     this.progressValue = 100;
   }
@@ -105,13 +121,12 @@ export class SettingComponent implements OnInit {
       }
       reader.readAsText(file, "Shift-JIS");
 
-      const jsonData = this.readExcelFile("./ShockTube結果.xlsx");
-      console.log(jsonData); // 読み込んだExcelデータをコンソールに表示する例
     }
     else if (file.name.endsWith(".MEM")){
       console.log("MEMを読み込んだ" + file.name);
     }
   }
+
   DownloadExcel(event : Event){
     const wb = XLSX.utils.book_new();
 

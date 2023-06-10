@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { CompService } from '../comp.service';
-import { MatInputModule } from '@angular/material/input';
+import { SettingService } from '../setting.service';
 export interface Bind {
   R: {
       g: string;
@@ -21,22 +21,21 @@ export interface Bind {
   Dth: number;
   T0:number;
   Wp:number;
+  groove:number;
 }
+
 @Component({
   selector: 'app-comp',
   templateUrl: './comp.component.html',
   styleUrls: ['./comp.component.css'],
 })
-export class CompComponent implements OnInit{
+export class CompComponent implements AfterViewInit{
   displayedColumns: string[] = ['name', 'value', 'unit'];
   Gas : string[] = ["Air", "N2", "He"];
-  bind :Bind = {R: {g: "Air", P:1}, C:{g:"He", P:101.3}, M:{g:"Air", P:1}, L:{g:"Air", P:100}, Dth:15, T0 : 300, Wp:0.28};
 
-  constructor(public compService : CompService){}
-  ngOnInit(){
-    this.onSelectedChanged();
-  }
+  constructor(public compService : CompService, public settingService: SettingService){}
+  ngAfterViewInit(){  }
   onSelectedChanged(){
-    this.compService.setCondition(this.bind);
+    this.compService.setCondition()
   }
 }

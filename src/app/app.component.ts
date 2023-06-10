@@ -1,16 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
-import * as dfd from 'danfojs';
 import { Papa } from 'ngx-papaparse';
-
-import { PlotlyService } from 'angular-plotly.js';
 import { SettingService } from './setting.service';
 import { Observable, ReplaySubject } from 'rxjs';
 import { CompService } from './comp.service';
 import { MicroService } from './micro.service';
 import { ShockService } from './shock.service';
-import { MatTable } from '@angular/material/table';
 export interface rowData {
   name : string;
   value : number;

@@ -3,7 +3,7 @@ import * as dfd from 'danfojs';
 import * as XLSX from 'xlsx';
 import { rowData } from './app.component';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
-import { Bind, CompComponent } from './comp/comp.component';
+import { Bind } from './comp/comp.component';
 @Injectable({
   providedIn: 'root'
 })
@@ -29,6 +29,7 @@ export class CompService {
   calcData :rowData[] = [];
   dataComp = new ReplaySubject<rowData[]>;
   data : {[key : string]: {value: number, unit : string}} = {};
+  bind :Bind = {R: {g: "Air", P:1}, C:{g:"He", P:101.3}, M:{g:"Air", P:1}, L:{g:"Air", P:100}, Dth:15, T0 : 300, Wp:0.28, groove:1.00};
 
   constructor() { }
   SetData(V_Pc:dfd.DataFrame){
@@ -58,7 +59,6 @@ export class CompService {
     console.log("construct compressiontube ... "+ this.Pmax, this.Pr, this.PrIndex, this.H_end_row, this.t_hold_start, this.t_hold_end)
 
     this.Pc.addColumn("tm", this.Pc["t"].mul(1000), {inplace:true});
-    this.calc();
   }
 
   public getDataSource(){
@@ -101,7 +101,8 @@ export class CompService {
     this.dataComp.next(this.getData());
   }
 
-  public setCondition(condition : Bind){
+  public setCondition(){
+    const condition = this.bind;
     //音速より先に温度を設定することに注意
     this.data["D*"] = {value: condition.Dth, unit : "mm"};
     this.data["T0"] = {value: condition.T0, unit : "K"};

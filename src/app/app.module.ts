@@ -22,6 +22,7 @@ import {ProgressBarMode, MatProgressBarModule} from '@angular/material/progress-
 import { ShockComponent } from './shock/shock.component';
 import { CompComponent } from './comp/comp.component';
 import { MatInputModule } from '@angular/material/input';
+import { HttpClientModule } from '@angular/common/http';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -53,6 +54,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatInputModule,
     ReactiveFormsModule,
     FormsModule,
+    HttpClientModule,
   ],
   exports: [
     MatStepperModule
