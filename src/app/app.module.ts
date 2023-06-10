@@ -16,11 +16,12 @@ import { SettingComponent } from './setting/setting.component'
 import {MatStepperModule} from '@angular/material/stepper';
 import { CommonModule } from '@angular/common';
 import {MatToolbarModule} from '@angular/material/toolbar'; 
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import {ProgressBarMode, MatProgressBarModule} from '@angular/material/progress-bar';
 import { ShockComponent } from './shock/shock.component';
 import { CompComponent } from './comp/comp.component';
+import { MatInputModule } from '@angular/material/input';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -30,7 +31,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     ErrorDialogComponent,
     SettingComponent,
     ShockComponent,
-    CompComponent
+    CompComponent,
   ],
   imports: [
     BrowserModule,
@@ -49,6 +50,9 @@ PlotlyModule.plotlyjs = PlotlyJS;
     //NgChartsModule,
     MatGridListModule,
     MatProgressBarModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    FormsModule,
   ],
   exports: [
     MatStepperModule

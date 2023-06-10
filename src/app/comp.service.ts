@@ -3,6 +3,7 @@ import * as dfd from 'danfojs';
 import * as XLSX from 'xlsx';
 import { rowData } from './app.component';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
+import { Bind, CompComponent } from './comp/comp.component';
 @Injectable({
   providedIn: 'root'
 })
@@ -57,19 +58,35 @@ export class CompService {
     console.log("construct compressiontube ... "+ this.Pmax, this.Pr, this.PrIndex, this.H_end_row, this.t_hold_start, this.t_hold_end)
 
     this.Pc.addColumn("tm", this.Pc["t"].mul(1000), {inplace:true});
+    this.calc();
+  }
 
-    this.data["k"] = {value: 1.67, unit: "-" } // 1
-    this.data["kR"] = {value: 1.4, unit:"-"}
-    this.data["T0"] = {value: 300 , unit: "K" }
-    this.data["Pc0"] = {value: 101.3 , unit: "kPa" }
-    this.data["D*"] =  {value: 15, unit: "mm"  } // 5
+  public getDataSource(){
+    return this.dataComp;
+  }
+
+  public getData() : rowData[]{
+    return Object.keys(this.data).map((key) => {
+      return {
+        name: key,
+        value: this.data[key].value,
+        unit: this.data[key].unit,
+      };
+    })
+  }
+  private calc(){
+    if(this.Pc == undefined){
+      console.log("先にPcを読み込む必要がある")
+      return;
+    }
+
+    //計算する
+    //実験条件を入力していることを確認
     this.data["Dc"] =  {value: 50, unit: "mm"  }
     this.data["Lc"] = {value: 2, unit: "m"  }
-    this.data["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/4*this.data["T0"].value), unit: "m/s"  }
-    this.data["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/28.8*this.data["T0"].value), unit: "m/s"  }
+
     this.data["alpha"] = {value: (this.data["D*"].value**2*this.data["a0"].value)/(this.data["Dc"].value**2*this.data["aR0"].value), unit: "-"  } // 10
     this.data["V0"] = {value: Math.PI/4*(this.data["Dc"].value*10**-3)**2*this.data["Lc"].value, unit: "m3"  }
-    this.data["Wp"] = {value: 0.28, unit: "kg"}
     this.data["omega"] = {value: Math.sqrt((2*(this.data["k"].value-1)*((this.data["k"].value+1)/2)**((this.data["k"].value+1)/(this.data["k"].value-1))*this.data["Pc0"].value*10**3*this.data["V0"].value/(this.data["Wp"].value*this.data["alpha"].value**2*this.data["aR0"].value**2))), unit: "-"  }
     this.data["PcMax"] = {value: this.Pmax, unit: "MPa"  }
     this.data["tMax"] = {value: this.Pc["t"].iloc(this.Pc["Pc"].eq(this.Pmax)).values[0], unit: "s"  } // 15
@@ -83,18 +100,49 @@ export class CompService {
 
     this.dataComp.next(this.getData());
   }
-  public getDataSource(){
-    return this.dataComp;
+
+  public setCondition(condition : Bind){
+    //音速より先に温度を設定することに注意
+    this.data["D*"] = {value: condition.Dth, unit : "mm"};
+    this.data["T0"] = {value: condition.T0, unit : "K"};
+    this.data["Wp"] = {value: condition.Wp, unit : "kg"};
+
+    //まず貯気槽について
+    let kappa = 1.4;
+    let Mol = 28.8;
+    if(condition.R.g == "Air"){
+      kappa = 1.4;
+      Mol = 28.8;
+    }else if(condition.R.g == "N2"){
+      kappa = 1.4;
+      Mol = 28;
+    }else if(condition.R.g == "He"){
+      kappa = 1.67;
+      Mol = 4;
+    }
+    this.data["kR"] = {value: kappa, unit : "-"}
+    this.data["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/Mol*this.data["T0"].value), unit: "m/s"};
+    this.data["PR0"] = {value : 1, unit: "MPa"}
+    
+    //次に圧縮管について
+    if(condition.C.g == "Air"){
+      kappa = 1.4;
+      Mol = 28.8;
+    }else if(condition.C.g == "He"){
+      kappa = 1.67;
+      Mol = 4;
+    }else if(condition.C.g == "N2"){
+      kappa = 1.4;
+      Mol = 28;
+    }
+    
+    this.data["k"] = {value: kappa, unit: "-"};
+    this.data["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/Mol*this.data["T0"].value), unit : "m/s"};
+    this.data["Pc0"] = {value: condition.C.P, unit : "kPa"};
+
+    this.calc();
   }
-  public getData() : rowData[]{
-    return Object.keys(this.data).map((key) => {
-      return {
-        name: key,
-        value: this.data[key].value,
-        unit: this.data[key].unit,
-      };
-    })
-  }
+
   public write(wb: any): void {
     if(this.Pc == undefined){
       console.log("SetDataが呼ばれていない");

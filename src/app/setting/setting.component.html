@@ -4,7 +4,7 @@
       <form [formGroup]="stepOneForm">
         <!-- Step 1のコンテンツ -->
         <p>csvかMEMを選ぶ</p>
-        <input matInput type="file" accept=".csv, .MEM" (change)="onFileSelected($event)" formControlName="firstCtrl" required/>
+        <input type="file" accept=".csv, .MEM" (change)="onFileSelected($event)" formControlName="firstCtrl" required/>
         <mat-progress-bar mode="determinate" [value]="progressValue"></mat-progress-bar>
       </form>
     </mat-step>
