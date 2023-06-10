@@ -1,5 +1,6 @@
 import { Injectable, OnInit } from '@angular/core';
 import * as dfd from "danfojs";
+import { Subject } from 'rxjs';
 import * as XLSX from "xlsx";
 @Injectable({
   providedIn: 'root'
@@ -9,9 +10,16 @@ export class MicroService implements OnInit {
   private num: number | undefined;
   private tati :number = 0;
   private ts: number | undefined;
+  private eventSubject = new Subject<any>;
 
   constructor() { }
   ngOnInit(): void { }
+  getEvent(){
+    return this.eventSubject.asObservable();
+  }
+  emitEvent(event : string){
+    this.eventSubject.next(event);
+  }
   SetData(IQ: dfd.DataFrame){
     this.IQ = IQ;
     this.IQ.print()
@@ -107,6 +115,7 @@ export class MicroService implements OnInit {
 
     this.IQ.print();
   }
+
   public write(wb: any): void {
     if(this.IQ == undefined){
       console.log("SetDataが呼ばれていない");

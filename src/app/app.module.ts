@@ -23,6 +23,7 @@ import { ShockComponent } from './shock/shock.component';
 import { CompComponent } from './comp/comp.component';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
+import { MicroComponent } from './micro/micro.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -33,6 +34,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     SettingComponent,
     ShockComponent,
     CompComponent,
+    MicroComponent,
   ],
   imports: [
     BrowserModule,

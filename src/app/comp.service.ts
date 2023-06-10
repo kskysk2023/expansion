@@ -26,7 +26,6 @@ export class CompService {
   private H_end_row: number = 0;
   private t_hold_start: number = 0;
   private t_hold_end: number = 0;
-  calcData :rowData[] = [];
   dataComp = new ReplaySubject<rowData[]>;
   data : {[key : string]: {value: number, unit : string}} = {};
   bind :Bind = {R: {g: "Air", P:1}, C:{g:"He", P:101.3}, M:{g:"Air", P:1}, L:{g:"Air", P:100}, Dth:15, T0 : 300, Wp:0.28, groove:1.00};
@@ -149,8 +148,6 @@ export class CompService {
       console.log("SetDataが呼ばれていない");
       return;
     }
-    const pcRow = "'data'!C1:'data'!C8002";
-    const tRow = "'data'!A1:'data'!A8002";
 
     var d : dfd.DataFrame = new dfd.DataFrame([this.Pc["t"].values, this.Pc["tm"].values, this.Pc["Pc"].values]).transpose();
     d.tail().print()
@@ -161,9 +158,9 @@ export class CompService {
     ];
 
     const ws = XLSX.utils.json_to_sheet(table1Data, {skipHeader:true})
-
-    const row = "B"
-    const column = 1
+    /*
+    const pcRow = "'data'!C1:'data'!C8002";
+    const tRow = "'data'!A1:'data'!A8002";
     XLSX.utils.sheet_add_json(ws,[
       ["k", 1.67],//1
       ["kR", 1.4],
@@ -188,11 +185,14 @@ export class CompService {
       ["holding time end[s]", this.t_hold_end],
       ["Holding Time[us]", { "f": "=(F21 - F17) * 10^6" }],
     ], {skipHeader:true, origin:"E1"});
-
-    XLSX.utils.sheet_add_json(ws,  [
-      ["up", "=INDEX(K:K, MATCH(N2, A:A, 1))"],
-      ["beta", "=N3/B19"]
-    ], {skipHeader:true, origin:"L1"});
+    */
+    const t = [
+      Object.keys(this.data),
+      Object.values(this.data).map((value) => value.unit),
+      Object.values(this.data).map((value) => value.value)
+    ];
+    console.log(t);
+    XLSX.utils.sheet_add_json(ws, t, {skipHeader:true, origin:"E1"});
 
     XLSX.utils.book_append_sheet(wb, ws, 'comp');
   }

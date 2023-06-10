@@ -74,6 +74,8 @@ export class SettingComponent implements OnInit {
       this.compService.setCondition();
     }
         
+    this.microService.emitEvent("load");
+
     //読み込み終わったら進捗を100％にする
     this.progressValue = 100;
   }
