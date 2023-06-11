@@ -24,13 +24,17 @@ export class SettingService {
   wsresult: XLSX.WorkSheet |undefined;
   condition : Condition|undefined;
   private eventSubject = new Subject<any>;
+  t : dfd.Series = new dfd.Series;
 
   constructor() { }
   setDataFrame(df : dfd.DataFrame){
     this.df = df;
+    this.t = df["時間[s]"];
     this.emitEvent("load");
   }
   getDataFrame(){return this.df;}
+  setTime(t :dfd.Series){this.t = t}
+  getTime(){return this.t}
 
   updateCHBindProperty(bind: any) {
     this.CHBindSubject.next(bind);

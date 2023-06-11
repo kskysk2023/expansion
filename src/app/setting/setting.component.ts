@@ -101,6 +101,7 @@ export class SettingComponent implements OnInit {
 
     //setするとイベントが送信される
     this.settingService.setDataFrame(df);
+
     //初期値の割り当て
     this.onSelectedChanged();
 
@@ -159,6 +160,27 @@ export class SettingComponent implements OnInit {
     }
     else if (file.name.endsWith(".MEM")){
       console.log("MEMを読み込んだ" + file.name);
+    }
+    else if(file.name.endsWith(".xlsx")){
+      console.log("xlsxを選んだ");
+      dfd.readExcel(file, {sheet: 0}).then((value) => {
+        const df = value as dfd.DataFrame;
+        console.log("comp")
+        this.settingService.setTime(df["t"]);
+        this.compService.setCalculatedData(df);
+      });
+      dfd.readExcel(file, {sheet: 1}).then((value) => {
+        const df = value as dfd.DataFrame;
+        df.print();
+        console.log("shock")
+      
+      });
+      dfd.readExcel(file, {sheet: 2}).then((value) => {
+        const df = value as dfd.DataFrame;
+        df.print();
+        console.log("micro")
+
+      });
     }
   }
 

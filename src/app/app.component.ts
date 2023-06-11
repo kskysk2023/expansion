@@ -93,7 +93,7 @@ export class AppComponent implements OnInit{
 
     const new_df = this.settingService.getDataFrame() //resets the index to Date column
     new_df.head().print() //
-    const t = this.settingService.getDataFrame()["時間[s]"].values;
+    const t = this.settingService.getTime().values as number[];
 
     //reset
     this.graph.data = [{ x: [] as number[], y: [] as number[], mode: 'scatter', yaxis:"y1" ,name:""}];

@@ -74,6 +74,32 @@ export class CompService {
     console.log("計算完了圧力");
     this.emitEvent("load");
   }
+  public setCalculatedData(data : dfd.DataFrame){
+    this.Pc = data.iloc({columns: ["0:3"]})
+    const datas = dfd.toJSON(data.iloc({columns:["4:"], rows: ["0:2"] })) as rowData[];
+    const gass = dfd.toJSON(data.iloc({columns:["4:8"], rows: ["5"]})) as string[];
+
+    Object.entries(datas[0]).forEach(([key, unit]) => {
+      this.data[key] = {value: 0, unit : unit};
+    })
+    console.log(this.data);
+    Object.entries(datas[1]).forEach(([key, value]) => {
+      this.data[key].value = value;
+    })
+    console.log(this.data["kR"].value, this.data["kR"].unit);
+    const b: Bind = {
+      R:{g:gass[0], P:this.data["PR0"].value},
+      C:{g:gass[1], P:this.data["Pc0"].value},
+      M:{g:gass[2], P:this.data["PM0"].value},
+      L:{g:gass[3], P:this.data["PL0"].value},
+      Dth:this.data["D*"].value,
+      T0 : this.data["T0"].value,
+      Wp:this.data["Wp"].value,
+      groove:this.data["groove"].value
+    };
+    this.dataComp.next(this.getData());
+    this.emitEvent("load");
+  }
 
   public getDataSource(){
     return this.dataComp;
@@ -121,40 +147,48 @@ export class CompService {
     this.data["D*"] = {value: condition.Dth, unit : "mm"};
     this.data["T0"] = {value: condition.T0, unit : "K"};
     this.data["Wp"] = {value: condition.Wp, unit : "kg"};
+    this.data["groove"] = {value: this.bind.groove, unit : "mm"};
+
+    const getKappaMol = (name : string) => {
+      let kappa = 1.4;
+      let Mol = 28.8;      
+      if(name == "Air"){
+        kappa = 1.4;
+        Mol = 28.8;
+      }else if(name == "N2"){
+        kappa = 1.4;
+        Mol = 28;
+      }else if(name == "He"){
+        kappa = 1.67;
+        Mol = 4;
+      }
+      return {k : kappa, Mol : Mol};
+    }
 
     //まず貯気槽について
-    let kappa = 1.4;
-    let Mol = 28.8;
-    if(condition.R.g == "Air"){
-      kappa = 1.4;
-      Mol = 28.8;
-    }else if(condition.R.g == "N2"){
-      kappa = 1.4;
-      Mol = 28;
-    }else if(condition.R.g == "He"){
-      kappa = 1.67;
-      Mol = 4;
-    }
-    this.data["kR"] = {value: kappa, unit : "-"}
-    this.data["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/Mol*this.data["T0"].value), unit: "m/s"};
-    this.data["PR0"] = {value : 1, unit: "MPa"}
+    const R = getKappaMol(this.bind.R.g);
+    this.data["molR"] = {value : R.Mol, unit: "-"}
+    this.data["kR"] = {value: R.k, unit : "-"}
+    this.data["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/R.Mol*this.data["T0"].value), unit: "m/s"};
+    this.data["PR0"] = {value : this.bind.R.P, unit: "MPa"}
     
     //次に圧縮管について
-    if(condition.C.g == "Air"){
-      kappa = 1.4;
-      Mol = 28.8;
-    }else if(condition.C.g == "He"){
-      kappa = 1.67;
-      Mol = 4;
-    }else if(condition.C.g == "N2"){
-      kappa = 1.4;
-      Mol = 28;
-    }
-    
-    this.data["k"] = {value: kappa, unit: "-"};
-    this.data["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/Mol*this.data["T0"].value), unit : "m/s"};
+    const C = getKappaMol(this.bind.C.g);
+    this.data["molR"] = {value : C.Mol, unit: "-"}
+    this.data["k"] = {value: C.k, unit: "-"};
+    this.data["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/C.Mol*this.data["T0"].value), unit : "m/s"};
     this.data["Pc0"] = {value: condition.C.P, unit : "kPa"};
 
+    //中圧管
+    const M = getKappaMol(this.bind.M.g);
+    this.data["molM"] = {value : M.Mol, unit: "-"}
+    this.data["kM"] = {value: M.k, unit: "-"};
+    this.data["PM0"] = {value: this.bind.M.P, unit: "kPa"};
+
+    const L = getKappaMol(this.bind.L.g);
+    this.data["molL"] = {value : L.Mol, unit: "-"}
+    this.data["kL"] = {value: L.k, unit: "-"};
+    this.data["PL0"] = {value: this.bind.L.P, unit: "Pa"};
     this.calc();
   }
 
@@ -173,34 +207,6 @@ export class CompService {
     ];
 
     const ws = XLSX.utils.json_to_sheet(table1Data, {skipHeader:true})
-    /*
-    const pcRow = "'data'!C1:'data'!C8002";
-    const tRow = "'data'!A1:'data'!A8002";
-    XLSX.utils.sheet_add_json(ws,[
-      ["k", 1.67],//1
-      ["kR", 1.4],
-      ["T0 K", 300],
-      ["Pc0[kPa]", 101.3],
-      ["D* mm", 15],//5
-      ["Dc mm", 50],
-      ["Lc m", 2],
-      ["a0 m/s", { "f": "=SQRT(F1*8314.3/4*F3)" }],
-      ["aR0 m/s", { "f": "=SQRT(F2*8314.3/28.8*F3)" }],
-      ["alpha", { "f": "=(F5^2*F8)/(F6^2*F9)" }],//10
-      ["V0 m3", { "f": "=PI()/4*(F6*10^-3)^2*F7" }],
-      ["Wp kg", 0.28],
-      ["omega", { "f": "=SQRT(2*(F1-1)*((F1+1)/2)^((F1+1)/(F1-1))*F4*10^3*F11/(F12*F10^2*F9^2))" }],
-      ["PcMax[MPa]", this.Pmax],
-      ["tMax[s]", this.Pc["t"].iloc(this.Pc["Pc"].eq(this.Pmax)).values[0]],//15
-      ["Pr[MPa]", this.Pr],
-      ["tr[s]", this.t_hold_start],
-      ["Tr[K]", { "f": "=F3*((F4*10^3)/(F16*10^6))^((1-F1)/F1)" }],
-      ["ar[m/s]", { "f": "=SQRT(F1*8314.3/4*F18)" }],
-      ["UR[m/s]", { "f": "=(2/(F1+1))^((F1+1)/(2*(F1-1)))*F5^2/F6^2*F19" }],//20
-      ["holding time end[s]", this.t_hold_end],
-      ["Holding Time[us]", { "f": "=(F21 - F17) * 10^6" }],
-    ], {skipHeader:true, origin:"E1"});
-    */
     const t = [
       Object.keys(this.data),
       Object.values(this.data).map((value) => value.unit),
@@ -208,6 +214,9 @@ export class CompService {
     ];
     console.log(t);
     XLSX.utils.sheet_add_json(ws, t, {skipHeader:true, origin:"E1"});
+
+    XLSX.utils.sheet_add_json(ws, [["高圧気体", "圧縮管気体", "中圧管気体", "低圧管気体"],
+                                   [this.bind.R.g, this.bind.C.g, this.bind.M.g, this.bind.L.g]], {skipHeader: true, origin:"E5"})
 
     XLSX.utils.book_append_sheet(wb, ws, 'comp');
   }

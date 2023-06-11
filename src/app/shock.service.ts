@@ -66,8 +66,11 @@ export class ShockService {
       //時間差を計算
       this.Dt_P[n1] = {name: "Δt" + ((n1 + 1) * 10 + (n2 + 1)).toString() , value: (this.t_P[n2].value - this.t_P[n1].value), unit:"s"};
       //Vの行
-      this.vs[n1] ={name : "V" + ((n1 + 1) * 10 + (n2 + 1)).toString(), value: 0.5/this.Dt_P[n1].value, unit: "m/s"};
-
+      if(n1 == 1){
+        this.vs[n1] ={name : "V" + ((n1 + 1) * 10 + (n2 + 1)).toString(), value: 1.17/this.Dt_P[n1].value, unit: "m/s"};
+      }else{
+        this.vs[n1] ={name : "V" + ((n1 + 1) * 10 + (n2 + 1)).toString(), value: 0.5/this.Dt_P[n1].value, unit: "m/s"};
+      }
     }
     const calcData = [...this.t_P, ...this.Dt_P , ...this.vs]
     this.dataShock.next(calcData);
