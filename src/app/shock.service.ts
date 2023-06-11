@@ -70,8 +70,11 @@ export class ShockService {
     this.dataShock.next(this.calcData);
   }
 
-  public getVelocity() : any{
+  public getVelocity() : rowData[]{
     return this.calcData.slice(4, 6);
+  }
+  public getTP() : rowData[]{
+    return this.calcData.slice(0, 4);
   }
   public getData() {
     return this.dataShock;

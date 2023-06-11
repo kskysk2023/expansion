@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MicroService } from '../micro.service';
 import { CompService } from '../comp.service';
 import { SettingService } from '../setting.service';
+import { ShockService } from '../shock.service';
 
 @Component({
   selector: 'app-micro',
@@ -11,7 +12,7 @@ import { SettingService } from '../setting.service';
 export class MicroComponent {
   graph = {
     data : [
-      { x: [0], y: [0], mode: 'scatter', yaxis:"y1" ,name:""},
+      { x: [0], y: [0], mode: 'scatter', yaxis:"y1" , name:"", line:{dash:'solid'}},
     ],
     layout : {
       font: { family: "Times new Roman", size: 16, color: "#000" },
@@ -26,6 +27,7 @@ export class MicroComponent {
       width:1400,
       yaxis:{
         title: "Compression Tube Pressure, MPa",
+        range: [0, 20],
       },
       yaxis2: {
         title: "xp, m",
@@ -43,8 +45,15 @@ export class MicroComponent {
         side:"right",
         overlaying: 'y' // 重ねて表示するために追加
       },
+      yaxis4: {
+        range: [0, 1],
+        side:"left",
+        visible:false,
+        automargin:true,
+        overlaying: 'y'
+      },
       xaxis: {
-        title: "time, s",
+        title: "time, ms",
       },
     },
     config : {
@@ -53,7 +62,7 @@ export class MicroComponent {
     }
   }
 
-  constructor(public microService : MicroService, public compService : CompService, private settingService: SettingService){ }
+  constructor(public microService : MicroService, public compService : CompService, private settingService: SettingService, private shockService : ShockService){ }
 
   ngAfterViewInit(){
     this.microService.getEvent().subscribe((event) => {
@@ -62,6 +71,12 @@ export class MicroComponent {
     this.compService.getEvent().subscribe((event) => {
       this.load();
     });
+    this.shockService.getEvent().subscribe((event) => {
+      this.load();
+    })
+    this.shockService.getData().subscribe((event) => {
+      this.load();
+    })
   }
 
   load(){
@@ -75,27 +90,69 @@ export class MicroComponent {
     }
 
     const t = this.compService.Pc["tm"].values;
+    const TP = this.shockService.getTP();
     this.graph.data = [
       {
         x: t,
         y: this.compService.Pc["Pc"].values,
         name:"圧縮",
         mode:'lines',
-        yaxis:"y1"
+        yaxis:"y1",
+        line:{dash:"solid"}
       },
       {
         x: t,
         y: this.microService.IQ["x"].values,
         name:"xp",
         mode:"lines",
-        yaxis:"y2"
+        yaxis:"y2",
+        line:{dash:"solid"}
       },
       {
         x: t,
         y: this.microService.IQ["P"].values,
         name:"power",
         mode:"lines",
-        yaxis:"y3"
+        yaxis:"y3",
+        line:{dash:"solid"}
+      },
+      {
+        x: [TP[0].value * 1000, TP[0].value * 1000],
+        y: [-20, 20],
+        name:"Med1",
+        mode:"lines",
+        line:{dash:"dash"},
+        yaxis:"y4"
+      },
+      {
+        x: [TP[1].value * 1000, TP[1].value * 1000],
+        y: [-20, 20],
+        name:"Med2",
+        mode:"lines",
+        line: {
+          dash: 'dash' // 線を破線にする
+        },
+        yaxis:"y4"
+      },
+      {
+        x: [TP[2].value * 1000, TP[2].value * 1000],
+        y: [-20, 20],
+        name:"Low1",
+        mode:"lines",
+        line: {
+          dash: 'dash' // 線を破線にする
+        },
+        yaxis:"y4"
+      },
+      {
+        x: [TP[3].value * 1000, TP[3].value * 1000],
+        y: [-20, 20],
+        name:"Low2",
+        mode:"lines",
+        line: {
+          dash: 'dash' // 線を破線にする
+        },
+        yaxis:"y4"
       },
     ];
   }
