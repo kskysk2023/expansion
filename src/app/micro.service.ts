@@ -114,6 +114,10 @@ export class MicroService implements OnInit {
     //this.v = dfd.DataFrame(this.x).diff({ periods: 1, axis: 0 }).div(this.ts).values[0];
 
     this.IQ.print();
+
+    //計算が完了したことを報告
+    console.log("計算完了マイクロ波");
+    this.emitEvent("load");
   }
 
   public write(wb: any): void {

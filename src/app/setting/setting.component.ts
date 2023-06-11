@@ -46,6 +46,13 @@ export class SettingComponent implements OnInit {
     });
   }
 
+  onSelectedChanged(){
+    this.settingService.getDataFrame().print();
+    this.microService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", this.bind.rI, this.bind.rQ]}));
+    this.compService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", this.bind.compression]}));
+    this.shockService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", this.bind.m1, this.bind.m2, this.bind.l1, this.bind.l2]}));
+  }
+
   oncomplete =(results : ParseResult<any>) =>{
     if(results.errors)console.log(results.errors)
     console.log(results.data);
@@ -60,12 +67,13 @@ export class SettingComponent implements OnInit {
 
     //メニューにchを登録
     this.settingService.setMenuCH(df.columns);
-    this.settingService.df = df;
+
+    //setするとイベントが送信される
+    this.settingService.setDataFrame(df);
+    //初期値の割り当て
+    this.onSelectedChanged();
 
     this.progressValue = 80;
-
-    //app componentにデータを更新させるために疑似的に選択が変わったとする
-    this.settingService.updateCHBindProperty(this.bind);
 
     //ガスと圧力をShockTube結果から読み込む
     const bind = this.settingService.getResult();
@@ -74,14 +82,8 @@ export class SettingComponent implements OnInit {
       this.compService.setCondition();
     }
         
-    this.microService.emitEvent("load");
-
     //読み込み終わったら進捗を100％にする
     this.progressValue = 100;
-  }
-
-  onSelectedChanged(){
-    this.settingService.updateCHBindProperty(this.bind);
   }
 
   async ReadCsv(text: string){

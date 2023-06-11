@@ -34,7 +34,8 @@ export class CompComponent implements AfterViewInit{
   Gas : string[] = ["Air", "N2", "He"];
 
   constructor(public compService : CompService, public settingService: SettingService){}
-  ngAfterViewInit(){  }
+  ngAfterViewInit(){ 
+  }
   onSelectedChanged(){
     this.compService.setCondition()
   }

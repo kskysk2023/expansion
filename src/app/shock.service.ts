@@ -3,6 +3,7 @@ import * as dfd from 'danfojs';
 import * as XLSX from 'xlsx';
 import { rowData } from './app.component';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -22,13 +23,34 @@ export class ShockService {
   public P: dfd.DataFrame | undefined;
   public calcData :rowData[] = [];
   dataShock = new ReplaySubject<rowData[]>;
+  private eventSubject = new Subject<any>;
 
   constructor() { }
+
+  getEvent(){
+    return this.eventSubject.asObservable();
+  }
+
+  emitEvent(event : string){
+    this.eventSubject.next(event);
+  }
+
   SetData(V_P:dfd.DataFrame){
-    this.P = V_P;
     console.log("V_P...");
     V_P.print();
-    console.log("construct shock ... ")
+
+    this.P = V_P;
+    this.P.columns[0] = "t"
+    this.P.columns[1] = "Med1"
+    this.P.columns[2] = "Med2"
+    this.P.columns[3] = "Low1"
+    this.P.columns[4] = "Low2"
+  
+    this.P.print();
+
+    //計算が完了したことを報告
+    console.log("計算完了衝撃波");
+    this.emitEvent("load");
   }
 
   public onPlotClick(plot: any){

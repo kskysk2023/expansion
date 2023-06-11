@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs/internal/observable/of';
 import * as dfd from 'danfojs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { Bind } from './comp/comp.component';
 
@@ -25,16 +25,30 @@ export class SettingService {
   wbresult: XLSX.WorkBook|undefined;
   wsresult: XLSX.WorkSheet |undefined;
   condition : Condition|undefined;
+  private eventSubject = new Subject<any>;
 
   constructor() { }
+  setDataFrame(df : dfd.DataFrame){
+    this.df = df;
+    this.emitEvent("load");
+  }
   getDataFrame(){return this.df;}
 
   updateCHBindProperty(bind: any) {
     this.CHBindSubject.next(bind);
   }
-  getCHBind() {return this.CHBind$;}
-  getCH(){return this.CHBindSubject.value;}
+  getCH(){
+    return this.CHBindSubject.value;
+  }
 
+  getEvent(){
+    return this.eventSubject.asObservable();
+  }
+
+  emitEvent(event : string){
+    this.eventSubject.next(event);
+  }
+  
   getOoutFileName(){
     return this.filename.slice(0, -11) + ".xlsx";
   }
@@ -81,7 +95,6 @@ export class SettingService {
         }
       }
     }
-    
     return undefined;
   }
 

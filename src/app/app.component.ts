@@ -20,8 +20,6 @@ export interface rowData {
 })
 
 export class AppComponent implements OnInit{
-  CHBind$ : Observable<any> | undefined ;
-
   displayedColumns: string[] = ['name', 'value', 'unit'];
   dataComp = new ReplaySubject<rowData[]>;
 
@@ -72,10 +70,15 @@ export class AppComponent implements OnInit{
               public compService : CompService, public microService : MicroService, public shockService : ShockService){
   }
   ngOnInit(){
-    this.CHBind$ = this.settingService.getCHBind();
-    this.CHBind$.subscribe((value) => {
-      console.log("obsever recieve")
-      this.CalcData(value)});
+    this.shockService.getEvent().subscribe((value) => {
+      this.CalcData();
+    });
+    this.compService.getEvent().subscribe((value) => {
+      this.CalcData();
+    });
+    this.microService.getEvent().subscribe((value) => {
+      this.CalcData();
+    });
   }
 
   openErrorDialog(errorMessage: string): void{
@@ -84,22 +87,22 @@ export class AppComponent implements OnInit{
       data: errorMessage 
     });
   }
-  CalcData(bind : any){
+  CalcData(){
     console.log("set data")
     if(this.settingService.getDataFrame().shape[1] < 4){
       return;
     }
-    this.compService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", bind.compression]}));
-    this.microService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", bind.rI, bind.rQ]}));
-    this.shockService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", bind.m1, bind.m2, bind.l1, bind.l2]}));
+
     if(this.microService.IQ == undefined || this.shockService.P == undefined|| this.compService.Pc == undefined){
       console.log("データがありません");
       return;
     }
 
-    const new_df = this.settingService.getDataFrame().setIndex({ column: "時間[s]", drop: true }); //resets the index to Date column
+    const new_df = this.settingService.getDataFrame() //resets the index to Date column
     new_df.head().print() //
     const t = this.settingService.getDataFrame()["時間[s]"].values;
+
+    this.shockService.P.print()
     this.graph.data = [
       {
         x: t,
@@ -110,28 +113,28 @@ export class AppComponent implements OnInit{
       },
       {
         x: t,
-        y: this.settingService.getDataFrame()[bind.m1].values,
+        y: this.shockService.P.column('Med1').values,
         name:"中1",
         mode:"lines",
         yaxis:"y2"
       },
       {
         x: t,
-        y: this.settingService.getDataFrame()[bind.m2].values,
+        y: this.shockService.P.column("Med2").values,
         name:"中2",
         mode:"lines",
         yaxis:"y2"
       },
       {
         x: t,
-        y: this.settingService.getDataFrame()[bind.l1].values,
+        y: this.shockService.P.column("Low1").values,
         name:"低1",
         mode:"lines",
         yaxis:"y2"
       },
       {
         x: t,
-        y: this.settingService.getDataFrame()[bind.l2].values,
+        y: this.shockService.P.column("Low2").values,
         name:"低2",
         mode:"lines",
         yaxis:"y2"

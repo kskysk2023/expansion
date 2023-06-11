@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 import { rowData } from './app.component';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
 import { Bind } from './comp/comp.component';
+import { Subject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
@@ -29,15 +30,25 @@ export class CompService {
   dataComp = new ReplaySubject<rowData[]>;
   data : {[key : string]: {value: number, unit : string}} = {};
   bind :Bind = {R: {g: "Air", P:1}, C:{g:"He", P:101.3}, M:{g:"Air", P:1}, L:{g:"Air", P:100}, Dth:15, T0 : 300, Wp:0.28, groove:1.00};
+  private eventSubject = new Subject<any>;
 
   constructor() { }
+
+  getEvent(){
+    return this.eventSubject.asObservable();
+  }
+
+  emitEvent(event : string){
+    this.eventSubject.next(event);
+  }
+
   SetData(V_Pc:dfd.DataFrame){
     this.Pc = V_Pc;
     console.log("V_Pc...");
     V_Pc.print();
     console.log("Pc... ");
     this.Pc.addColumn("Pc", this.Pc["CH1-1[V]"].add(1.4).mul(25.482), {inplace:true});
-    this.Pc = this.Pc.rename({"時間[s]":"t","CH1-1[V]1": "Pc"});
+    this.Pc = this.Pc.rename({"時間[s]":"t", 1: "Pc"});
     console.log("Pc....");
     this.Pc.print();
     
@@ -58,6 +69,10 @@ export class CompService {
     console.log("construct compressiontube ... "+ this.Pmax, this.Pr, this.PrIndex, this.H_end_row, this.t_hold_start, this.t_hold_end)
 
     this.Pc.addColumn("tm", this.Pc["t"].mul(1000), {inplace:true});
+    
+    //計算が完了したことを報告
+    console.log("計算完了圧力");
+    this.emitEvent("load");
   }
 
   public getDataSource(){

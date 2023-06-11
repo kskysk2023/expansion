@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MicroService } from '../micro.service';
 import { CompService } from '../comp.service';
+import { SettingService } from '../setting.service';
 
 @Component({
   selector: 'app-micro',
@@ -52,12 +53,15 @@ export class MicroComponent {
     }
   }
 
-  constructor(public microService : MicroService, public compService : CompService){ }
+  constructor(public microService : MicroService, public compService : CompService, private settingService: SettingService){ }
 
   ngAfterViewInit(){
     this.microService.getEvent().subscribe((event) => {
       this.load();
-    })
+    });
+    this.compService.getEvent().subscribe((event) => {
+      this.load();
+    });
   }
 
   load(){
