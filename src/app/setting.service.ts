@@ -16,11 +16,9 @@ export interface Condition{
 export class SettingService {
   private CHBindSubject = new BehaviorSubject<any>({});
 
-  CHBind$ = this.CHBindSubject.asObservable();
-
   filename = "";
   excelPartName = "";
-  public CHs :string[] = [];
+
   df : dfd.DataFrame = new dfd.DataFrame;
   wbresult: XLSX.WorkBook|undefined;
   wsresult: XLSX.WorkSheet |undefined;
@@ -52,9 +50,7 @@ export class SettingService {
   getOoutFileName(){
     return this.filename.slice(0, -11) + ".xlsx";
   }
-  setMenuCH(CHs: string[]){
-    this.CHs = CHs;
-  }
+
   setFileName(filename: string){
     this.filename = filename;
     const nameparts = filename.split("_");

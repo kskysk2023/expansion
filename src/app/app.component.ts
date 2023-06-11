@@ -7,6 +7,7 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { CompService } from './comp.service';
 import { MicroService } from './micro.service';
 import { ShockService } from './shock.service';
+import { ArrayType1D } from 'danfojs/dist/danfojs-base/shared/types';
 export interface rowData {
   name : string;
   value : number;
@@ -25,7 +26,7 @@ export class AppComponent implements OnInit{
 
   graph = {
     data : [
-      { x: [0], y: [0], mode: 'scatter', yaxis:"y1" ,name:""},
+      { x: [] as number[], y: [] as number[], mode: 'scatter', yaxis:"y1" ,name:""},
     ],
     layout : {
       font: { family: "Times new Roman", size: 16, color: "#000" },
@@ -89,85 +90,62 @@ export class AppComponent implements OnInit{
   }
   CalcData(){
     console.log("set data")
-    if(this.settingService.getDataFrame().shape[1] < 4){
-      return;
-    }
-
-    if(this.microService.IQ == undefined || this.shockService.P == undefined|| this.compService.Pc == undefined){
-      console.log("データがありません");
-      return;
-    }
 
     const new_df = this.settingService.getDataFrame() //resets the index to Date column
     new_df.head().print() //
     const t = this.settingService.getDataFrame()["時間[s]"].values;
 
-    this.shockService.P.print()
-    this.graph.data = [
-      {
+    //reset
+    this.graph.data = [{ x: [] as number[], y: [] as number[], mode: 'scatter', yaxis:"y1" ,name:""}];
+
+    if(this.compService.Pc){
+      console.log("圧縮管のデータがある");
+      this.graph.data.push({
         x: t,
         y: this.compService.Pc["Pc"].values,
         name:"圧縮",
         mode:'lines',
         yaxis:"y1"
-      },
-      {
-        x: t,
-        y: this.shockService.P.column('Med1').values,
-        name:"中1",
-        mode:"lines",
-        yaxis:"y2"
-      },
-      {
-        x: t,
-        y: this.shockService.P.column("Med2").values,
-        name:"中2",
-        mode:"lines",
-        yaxis:"y2"
-      },
-      {
-        x: t,
-        y: this.shockService.P.column("Low1").values,
-        name:"低1",
-        mode:"lines",
-        yaxis:"y2"
-      },
-      {
-        x: t,
-        y: this.shockService.P.column("Low2").values,
-        name:"低2",
-        mode:"lines",
-        yaxis:"y2"
-      },
-      {
+      });
+    }
+    if(this.shockService.P){
+      const cols = this.shockService.P.columns;
+      console.log("PCBのセンサは", cols.length - 1, "個ある");
+    
+      cols.forEach((colname : string, index : number) => {
+        if(index == 0){return;}
+        if(this.shockService.P){
+          this.graph.data.push({
+            x: t,
+            y: this.shockService.P.column(colname).values as number[],
+            name:colname,
+            mode:"lines",
+            yaxis:"y2"
+          });
+        }
+      });
+    }
+    if(this.microService.IQ){
+      console.log("圧縮管のデータがある");
+      this.graph.data.push({
         x: t,
         y: this.microService.IQ["P"].values,
         name:"Power",
         mode:"lines",
         yaxis:"y3"
-      },
-    ];
-      
-    //display csv as table
-    this.microService.IQ.plot("tableCalced").table({
-    layout: {
-      title:"Calc data",
-      font: {family: "Times new Roman", size: 10.5, color: "#000" },
-      width: 1600, height:1000}
-    });
-    //display csv as table
-    this.settingService.getDataFrame().plot("table").table({
-    layout: {
-      title:"HIOKI data",
-      font: {family: "Times new Roman", size: 10.5, color: "#000" },
-      width: 1600, height:1000}
-    });
+      });
+    }
+
   }
 
   onPlotlyClick(event :any){
-    console.log(event.points[0]);
-    if(1 <= event.points[0].curveNumber && event.points[0].curveNumber <= 4){
-      this.shockService.onPlotClick(event.points[0]);
+    console.log(event.points[0].data.name)
+    const shocks = this.shockService.P?.columns;
+    const plotnum = shocks?.findIndex((v) => v === event.points[0].data.name);
+    if(plotnum != -1 && plotnum){
+      //時間の列を除くために-1
+      console.log(event.points[0].x)
+      this.shockService.onPlotClick(plotnum -1, event.points[0].x);
     }
   }
 }

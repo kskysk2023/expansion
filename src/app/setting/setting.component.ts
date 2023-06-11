@@ -8,6 +8,12 @@ import { MicroService } from '../micro.service';
 import { ShockService } from '../shock.service';
 import { FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+export interface Bind {
+  compression: string,
+  shock : {m1: string, m2: string, l1: string, l2: string},
+  piston : {I:string, Q: string},
+  rupture : {I: string, Q: string}
+}
 
 @Component({
   selector: 'app-setting',
@@ -20,9 +26,12 @@ export class SettingComponent implements OnInit {
   stepOneForm = this.formBuilder.group({
     firstCtrl: ['', Validators.required]
   });
-  bind = {
-    compression: "CH1-1[V]", m1: "CH2-1[V]", m2: "CH3-1[V]", l1: "CH4-1[V]", l2: "CH5-1[V]",
-    pI: "CH6-1[V]", pQ: "CH6-2[V]", rI: "CH7-1[V]", rQ: "CH7-2[V]"
+  public CHs :string[] = [];
+  bind :Bind = {
+    compression: "CH1-1[V]",
+    shock :{m1: "×", m2: "×", l1: "×", l2: "×"},
+    piston : {I: "×", Q: "×"},
+    rupture : {I: "×", Q: "×"}
   }
 
   constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, private formBuilder: FormBuilder,
@@ -47,10 +56,31 @@ export class SettingComponent implements OnInit {
   }
 
   onSelectedChanged(){
-    this.settingService.getDataFrame().print();
-    this.microService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", this.bind.rI, this.bind.rQ]}));
-    this.compService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", this.bind.compression]}));
-    this.shockService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", this.bind.m1, this.bind.m2, this.bind.l1, this.bind.l2]}));
+    if(this.bind.compression != undefined){
+      this.compService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", this.bind.compression]}));
+    }
+    if(this.bind.shock){
+      const co:string[] = [];
+      Object.values(this.bind.shock).forEach((value) => {
+        if(value && value != "×"){
+          co.push(value);
+        }
+      });
+      if(co.length > 1){
+        this.shockService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", ...co]}));
+      }
+    }
+    if(this.bind.rupture){
+      const co:string[] = [];
+      Object.values(this.bind.rupture).forEach((value) => {
+        if(value && value != "×"){
+          co.push(value);
+        }
+      });
+      if(co.length > 2){
+        this.microService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", ...co]}));
+      }
+    }
   }
 
   oncomplete =(results : ParseResult<any>) =>{
@@ -66,7 +96,8 @@ export class SettingComponent implements OnInit {
     this.progressValue = 70;
 
     //メニューにchを登録
-    this.settingService.setMenuCH(df.columns);
+    this.CHs = df.columns;
+    this.CHs.push("×")
 
     //setするとイベントが送信される
     this.settingService.setDataFrame(df);

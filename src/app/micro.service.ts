@@ -23,9 +23,11 @@ export class MicroService implements OnInit {
   SetData(IQ: dfd.DataFrame){
     this.IQ = IQ;
     this.IQ.print()
-    this.IQ.columns[0] = "t"
-    this.IQ.columns[1] = "I"
-    this.IQ.columns[2] = "Q"
+    const names = ["t", "I", "Q"];
+    for (let index = 0; index < this.IQ.columns.length; index++) {
+      this.IQ.columns[index] = names[index];
+    }
+
     //this.IQ["時間[s]"].print()
     this.IQ.print()
     this.IQ.tail().print()

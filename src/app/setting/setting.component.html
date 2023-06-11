@@ -12,32 +12,32 @@
     <mat-step label="圧力のCHを割り当て">
       <mat-form-field>
         <mat-label>圧縮管圧力センサ</mat-label>
-        <mat-select [(value)]="bind.compression" (selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="this.bind.compression" (selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>中圧管1センサ</mat-label>
-        <mat-select [(value)]="bind.m1"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="this.bind.shock.m1"(selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>中圧管2センサ</mat-label>
-        <mat-select [(value)]="bind.m2"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="this.bind.shock.m2"(selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>低圧管1センサ</mat-label>
-        <mat-select [(value)]="bind.l1"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="this.bind.shock.l1"(selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>低圧管2センサ</mat-label>
-        <mat-select [(value)]="bind.l2"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="this.bind.shock.l2"(selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
     </mat-step>
@@ -45,26 +45,26 @@
     <mat-step label="マイクロ波のCHを割り当て">
       <mat-form-field>
         <mat-label>ピストンI</mat-label>
-        <mat-select [(value)]="bind.pI" (selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="bind.piston.I" (selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>ピストンQ</mat-label>
-        <mat-select [(value)]="bind.pQ"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="bind.piston.Q"(selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>破膜I</mat-label>
-        <mat-select [(value)]="bind.rI"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="bind.rupture.I"(selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>破膜Q</mat-label>
-        <mat-select [(value)]="bind.rQ"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.settingService.CHs" [value]="CH">{{CH}}</mat-option>
+        <mat-select [(value)]="bind.rupture.Q"(selectionChange)="onSelectedChanged()">
+          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
     </mat-step>
