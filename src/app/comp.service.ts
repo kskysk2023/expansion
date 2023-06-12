@@ -3,7 +3,7 @@ import * as dfd from 'danfojs';
 import * as XLSX from 'xlsx';
 import { rowData } from './app.component';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
-import { Bind } from './comp/comp.component';
+import { Gass } from './comp/comp.component';
 import { Subject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
@@ -29,7 +29,7 @@ export class CompService {
   private t_hold_end: number = 0;
   dataComp = new ReplaySubject<rowData[]>;
   data : {[key : string]: {value: number, unit : string}} = {};
-  bind :Bind = {R: {g: "Air", P:1}, C:{g:"He", P:101.3}, M:{g:"Air", P:1}, L:{g:"Air", P:100}, Dth:15, T0 : 300, Wp:0.28, groove:1.00};
+  gass : Gass = {R: {g: "Air", P:1}, C:{g:"He", P:101.3}, M:{g:"Air", P:1}, L:{g:"Air", P:100}, Dth:15, T0 : 300, Wp:0.28, groove:1.00};
   private eventSubject = new Subject<any>;
 
   constructor() { }
@@ -76,8 +76,8 @@ export class CompService {
   }
   public setCalculatedData(data : dfd.DataFrame){
     this.Pc = data.iloc({columns: ["0:3"]})
-    const datas = dfd.toJSON(data.iloc({columns:["4:"], rows: ["0:2"] })) as rowData[];
-    const gass = dfd.toJSON(data.iloc({columns:["4:8"], rows: ["5"]})) as string[];
+    const datas = dfd.toJSON(data.iloc({columns:["3:"], rows: ["0:2"] })) as rowData[];
+    const gass = dfd.toJSON(data.iloc({columns:["3:8"], rows: ["5:6"]})) as string[];
 
     Object.entries(datas[0]).forEach(([key, unit]) => {
       this.data[key] = {value: 0, unit : unit};
@@ -87,12 +87,13 @@ export class CompService {
       this.data[key].value = value;
     })
     console.log(this.data["kR"].value, this.data["kR"].unit);
-    const b: Bind = {
+    console.log(this.data["Dth"], this.data["Dth"].unit)
+    this.gass = {
       R:{g:gass[0], P:this.data["PR0"].value},
       C:{g:gass[1], P:this.data["Pc0"].value},
       M:{g:gass[2], P:this.data["PM0"].value},
       L:{g:gass[3], P:this.data["PL0"].value},
-      Dth:this.data["D*"].value,
+      Dth:this.data["Dth"].value,
       T0 : this.data["T0"].value,
       Wp:this.data["Wp"].value,
       groove:this.data["groove"].value
@@ -125,7 +126,7 @@ export class CompService {
     this.data["Dc"] =  {value: 50, unit: "mm"  }
     this.data["Lc"] = {value: 2, unit: "m"  }
 
-    this.data["alpha"] = {value: (this.data["D*"].value**2*this.data["a0"].value)/(this.data["Dc"].value**2*this.data["aR0"].value), unit: "-"  } // 10
+    this.data["alpha"] = {value: (this.data["Dth"].value**2*this.data["a0"].value)/(this.data["Dc"].value**2*this.data["aR0"].value), unit: "-"  } // 10
     this.data["V0"] = {value: Math.PI/4*(this.data["Dc"].value*10**-3)**2*this.data["Lc"].value, unit: "m3"  }
     this.data["omega"] = {value: Math.sqrt((2*(this.data["k"].value-1)*((this.data["k"].value+1)/2)**((this.data["k"].value+1)/(this.data["k"].value-1))*this.data["Pc0"].value*10**3*this.data["V0"].value/(this.data["Wp"].value*this.data["alpha"].value**2*this.data["aR0"].value**2))), unit: "-"  }
     this.data["PcMax"] = {value: this.Pmax, unit: "MPa"  }
@@ -134,7 +135,7 @@ export class CompService {
     this.data["tr"] = {value: this.t_hold_start, unit: "s"  }
     this.data["Tr"] = {value: this.data["T0"].value*((this.data["Pc0"].value*10**3)/(this.data["Pr"].value*10**6))**((1-this.data["k"].value)/this.data["k"].value), unit: "K"  }
     this.data["ar"] = {value: Math.sqrt(this.data["k"].value*8314.3/4*this.data["Tr"].value), unit: "m/s"  }
-    this.data["UR"] = {value: (2/(this.data["k"].value+1))**((this.data["k"].value+1)/(2*(this.data["k"].value-1)))*this.data["D*"].value**2/this.data["Dc"].value**2*this.data["ar"].value , unit: "m/s"  }// 20
+    this.data["UR"] = {value: (2/(this.data["k"].value+1))**((this.data["k"].value+1)/(2*(this.data["k"].value-1)))*this.data["Dth"].value**2/this.data["Dc"].value**2*this.data["ar"].value , unit: "m/s"  }// 20
     this.data["holding time end"] = {value: this.t_hold_end, unit: "s"  }
     this.data["Holding Time"] =  { value: (this.data["holding time end"].value - this.data["tr"].value) * 10**6, unit: "us"  }
 
@@ -142,12 +143,12 @@ export class CompService {
   }
 
   public setCondition(){
-    const condition = this.bind;
+    const condition = this.gass;
     //音速より先に温度を設定することに注意
-    this.data["D*"] = {value: condition.Dth, unit : "mm"};
+    this.data["Dth"] = {value: condition.Dth, unit : "mm"};
     this.data["T0"] = {value: condition.T0, unit : "K"};
     this.data["Wp"] = {value: condition.Wp, unit : "kg"};
-    this.data["groove"] = {value: this.bind.groove, unit : "mm"};
+    this.data["groove"] = {value: this.gass.groove, unit : "mm"};
 
     const getKappaMol = (name : string) => {
       let kappa = 1.4;
@@ -166,29 +167,29 @@ export class CompService {
     }
 
     //まず貯気槽について
-    const R = getKappaMol(this.bind.R.g);
+    const R = getKappaMol(this.gass.R.g);
     this.data["molR"] = {value : R.Mol, unit: "-"}
     this.data["kR"] = {value: R.k, unit : "-"}
     this.data["aR0"] = {value: Math.sqrt(this.data["kR"].value*8314.3/R.Mol*this.data["T0"].value), unit: "m/s"};
-    this.data["PR0"] = {value : this.bind.R.P, unit: "MPa"}
+    this.data["PR0"] = {value : this.gass.R.P, unit: "MPa"}
     
     //次に圧縮管について
-    const C = getKappaMol(this.bind.C.g);
+    const C = getKappaMol(this.gass.C.g);
     this.data["molR"] = {value : C.Mol, unit: "-"}
     this.data["k"] = {value: C.k, unit: "-"};
     this.data["a0"] = {value: Math.sqrt(this.data["k"].value*8314.3/C.Mol*this.data["T0"].value), unit : "m/s"};
     this.data["Pc0"] = {value: condition.C.P, unit : "kPa"};
 
     //中圧管
-    const M = getKappaMol(this.bind.M.g);
+    const M = getKappaMol(this.gass.M.g);
     this.data["molM"] = {value : M.Mol, unit: "-"}
     this.data["kM"] = {value: M.k, unit: "-"};
-    this.data["PM0"] = {value: this.bind.M.P, unit: "kPa"};
+    this.data["PM0"] = {value: this.gass.M.P, unit: "kPa"};
 
-    const L = getKappaMol(this.bind.L.g);
+    const L = getKappaMol(this.gass.L.g);
     this.data["molL"] = {value : L.Mol, unit: "-"}
     this.data["kL"] = {value: L.k, unit: "-"};
-    this.data["PL0"] = {value: this.bind.L.P, unit: "Pa"};
+    this.data["PL0"] = {value: this.gass.L.P, unit: "Pa"};
     this.calc();
   }
 
@@ -216,7 +217,7 @@ export class CompService {
     XLSX.utils.sheet_add_json(ws, t, {skipHeader:true, origin:"E1"});
 
     XLSX.utils.sheet_add_json(ws, [["高圧気体", "圧縮管気体", "中圧管気体", "低圧管気体"],
-                                   [this.bind.R.g, this.bind.C.g, this.bind.M.g, this.bind.L.g]], {skipHeader: true, origin:"E5"})
+                                   [this.gass.R.g, this.gass.C.g, this.gass.M.g, this.gass.L.g]], {skipHeader: true, origin:"E5"})
 
     XLSX.utils.book_append_sheet(wb, ws, 'comp');
   }

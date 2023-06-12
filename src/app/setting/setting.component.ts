@@ -110,7 +110,7 @@ export class SettingComponent implements OnInit {
     //ガスと圧力をShockTube結果から読み込む
     const bind = this.settingService.getResult();
     if(bind != undefined){
-      this.compService.bind = bind;
+      this.compService.gass = bind;
       this.compService.setCondition();
     }
         

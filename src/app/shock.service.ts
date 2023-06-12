@@ -57,19 +57,24 @@ export class ShockService {
   public onPlotClick(num:number, time: number){
     //立ち上がりの時刻を代入
     this.t_P[num] = {name: "t_P" + (num + 1).toString(), value: time, unit:"s"};
-
-    //一戸隣の立ち上がりが計算されているときだけ
-    if(this.t_P[num - 1] || this.t_P[num + 1]){
-      const n1 = this.t_P[num - 1]?num - 1 : num;
-      const n2 = this.t_P[num - 1]?num : num + 1;
- 
-      //時間差を計算
-      this.Dt_P[n1] = {name: "Δt" + ((n1 + 1) * 10 + (n2 + 1)).toString() , value: (this.t_P[n2].value - this.t_P[n1].value), unit:"s"};
-      //Vの行
-      if(n1 == 1){
-        this.vs[n1] ={name : "V" + ((n1 + 1) * 10 + (n2 + 1)).toString(), value: 1.17/this.Dt_P[n1].value, unit: "m/s"};
-      }else{
-        this.vs[n1] ={name : "V" + ((n1 + 1) * 10 + (n2 + 1)).toString(), value: 0.5/this.Dt_P[n1].value, unit: "m/s"};
+    if(this.P){
+      for (let index = 0; index < this.P.columns.length; index++) {
+        //隣の立ち上がりが入力されていたら
+        if(this.t_P[index + 1]){
+          //時間差を計算
+          this.Dt_P[index] = {
+            name: "Δt" + ((index + 1) * 10 + (index + 2)).toString(),
+            value: (this.t_P[index + 1].value - this.t_P[index].value),
+            unit:"s"
+          };
+          //中圧管と低圧管の間は長さが違う
+          const l = (index == 1?1.17:0.5);
+          this.vs[index] = {
+            name : "V" + ((index + 1) * 10 + (index + 2)).toString(),
+            value: l/this.Dt_P[index].value,
+            unit: "m/s"
+          };          
+        }
       }
     }
     const calcData = [...this.t_P, ...this.Dt_P , ...this.vs]

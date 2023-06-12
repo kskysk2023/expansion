@@ -3,11 +3,11 @@ import { of } from 'rxjs/internal/observable/of';
 import * as dfd from 'danfojs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
-import { Bind } from './comp/comp.component';
+import { Gass } from './comp/comp.component';
 
 export interface Condition{
   Shot:number;
-  bind:Bind;
+  bind: Gass;
 }
 
 @Injectable({
@@ -22,7 +22,7 @@ export class SettingService {
   df : dfd.DataFrame = new dfd.DataFrame;
   wbresult: XLSX.WorkBook|undefined;
   wsresult: XLSX.WorkSheet |undefined;
-  condition : Condition|undefined;
+  condition : Gass|undefined;
   private eventSubject = new Subject<any>;
   t : dfd.Series = new dfd.Series;
 
@@ -119,7 +119,7 @@ export class SettingService {
         Wp = 0.17;
       }
 
-      const b: Bind = {R: {g:rowData[10], P:rowData[14]}, C:{g:rowData[11], P:rowData[15]}, M:{g:rowData[12], P:rowData[16]}, L:{g:rowData[13], P:rowData[17]}, Dth:rowData[6],
+      const b: Gass = {R: {g:rowData[10], P:rowData[14]}, C:{g:rowData[11], P:rowData[15]}, M:{g:rowData[12], P:rowData[16]}, L:{g:rowData[13], P:rowData[17]}, Dth:rowData[6],
                        T0 : 300, Wp:Wp, groove:rowData[9]};
       return b;
     } else {

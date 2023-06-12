@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { CompService } from '../comp.service';
 import { SettingService } from '../setting.service';
-export interface Bind {
+export interface Gass {
   R: {
       g: string;
       P: number;
