@@ -121,6 +121,10 @@ export class MicroService implements OnInit {
     console.log("計算完了マイクロ波");
     this.emitEvent("load");
   }
+  public setCalculatedData(df : dfd.DataFrame){
+    this.IQ = df.drop({index:[0]});
+    this.emitEvent("load")
+  }
 
   public write(wb: any): void {
     if(this.IQ == undefined){

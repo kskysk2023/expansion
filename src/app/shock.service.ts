@@ -21,9 +21,7 @@ export class ShockService {
     return x;
   }
   public P: dfd.DataFrame | undefined;
-  public t_P :rowData[] = [];
-  Dt_P : rowData[] = [];
-  vs : rowData[] = [];
+  data : {[key : string]: {value: number, unit : string}} = {};
   dataShock = new ReplaySubject<rowData[]>;
   private eventSubject = new Subject<any>;
 
@@ -53,43 +51,74 @@ export class ShockService {
     console.log("計算完了衝撃波");
     this.emitEvent("load");
   }
+  
+  public getData() : rowData[]{
+    const keys = Object.keys(this.data).sort();
+    let sortedData: {[key : string]: {value: number, unit : string}} = {};
+    for(let key of keys){
+      sortedData[key] = this.data[key];
+    }
+    return Object.keys(sortedData).map((key) => {
+      return {
+        name: key,
+        value: sortedData[key].value,
+        unit: sortedData[key].unit,
+      };
+    })
+  }
 
   public onPlotClick(num:number, time: number){
     //立ち上がりの時刻を代入
-    this.t_P[num] = {name: "t_P" + (num + 1).toString(), value: time, unit:"s"};
+    const name_t = "t_P" + (num + 1).toString();
+    this.data[name_t] = {value: time, unit:"s"};
     if(this.P){
       for (let index = 0; index < this.P.columns.length; index++) {
         //隣の立ち上がりが入力されていたら
-        if(this.t_P[index + 1]){
+        if(this.data["t_P" + (index + 2).toString()]){
           //時間差を計算
-          this.Dt_P[index] = {
-            name: "Δt" + ((index + 1) * 10 + (index + 2)).toString(),
-            value: (this.t_P[index + 1].value - this.t_P[index].value),
+          const name = "Δt" + ((index + 1) * 10 + (index + 2)).toString()
+          this.data[name] = {
+            value: (this.data["t_P" + (index + 2).toString()].value - this.data["t_P" + (index + 1).toString()].value),
             unit:"s"
           };
           //中圧管と低圧管の間は長さが違う
+          const name_v = "V" + ((index + 1) * 10 + (index + 2)).toString()
           const l = (index == 1?1.17:0.5);
-          this.vs[index] = {
-            name : "V" + ((index + 1) * 10 + (index + 2)).toString(),
-            value: l/this.Dt_P[index].value,
+          this.data[name_v] = {
+            value: l/this.data[name].value,
             unit: "m/s"
           };          
         }
       }
     }
-    const calcData = [...this.t_P, ...this.Dt_P , ...this.vs]
-    this.dataShock.next(calcData);
-    console.log("shock data...." , calcData)
+    this.dataShock.next(this.getData());
+    console.log("shock data...." , this.getData());
   }
 
-  public getVelocity() : rowData[]{
-    return this.vs;
+  public getDataSource() {
+    return this.dataShock;
   }
   public getTP() : rowData[]{
-    return this.t_P;
+    const r : rowData[] = [];
+    this.getData().forEach((value: rowData, index) => {
+      if(value.name.startsWith("t_P")){
+        r.push(value);
+      }
+    })
+    return r;
   }
-  public getData() {
-    return this.dataShock;
+  public setCalculatedData(df : dfd.DataFrame){
+    const datas = dfd.toJSON(df.iloc({columns:["0:"], rows: ["0:2"] })) as rowData[];
+    console.log(datas);
+    const series = Object.entries(datas);
+    console.log(series);
+    Object.entries(datas[0]).forEach(([key, unit]) => {
+      this.data[key] = {value: 0, unit : unit};
+    })
+    console.log(this.data);
+    Object.entries(datas[1]).forEach(([key, value]) => {
+      this.data[key].value = value;
+    }) 
   }
 
   public write(wb: any): void {
@@ -97,11 +126,11 @@ export class ShockService {
       console.log("SetDataが呼ばれていない");
       return;
     }
-    const calcData = [...this.t_P, ...this.Dt_P, ...this.vs];
+    const f = this.getData();
     const t = [
-      calcData.map((value) => value.name),
-      calcData.map((value) => value.unit),
-      calcData.map((value) => value.value)
+      Object.values(f).map((value) => value.name),
+      Object.values(f).map((value) => value.unit),
+      Object.values(f).map((value) => value.value)
     ];
     console.log(t);
     const ws = XLSX.utils.json_to_sheet(t, {skipHeader:true});

@@ -3,6 +3,7 @@ import { MicroService } from '../micro.service';
 import { CompService } from '../comp.service';
 import { SettingService } from '../setting.service';
 import { ShockService } from '../shock.service';
+import { rowData } from '../app.component';
 
 @Component({
   selector: 'app-micro',
@@ -74,7 +75,7 @@ export class MicroComponent {
     this.shockService.getEvent().subscribe((event) => {
       this.load();
     })
-    this.shockService.getData().subscribe((event) => {
+    this.shockService.getDataSource().subscribe((event) => {
       this.load();
     })
   }
@@ -89,8 +90,10 @@ export class MicroComponent {
       return;
     }
 
-    const t = this.compService.Pc["tm"].values;
-    const TP = this.shockService.getTP();
+    this.settingService.getTime().print();
+    const t = this.settingService.getTime().mul(1000).values as number[];
+    console.log(t[0])
+    
     this.graph.data = [
       {
         x: t,
@@ -116,36 +119,11 @@ export class MicroComponent {
         yaxis:"y3",
         line:{dash:"solid"}
       },
-      {
-        x: [TP[0].value * 1000, TP[0].value * 1000],
-        y: [-20, 20],
-        name:"Med1",
-        mode:"lines",
-        line:{dash:"dash"},
-        yaxis:"y4"
-      },
-      {
-        x: [TP[1].value * 1000, TP[1].value * 1000],
-        y: [-20, 20],
-        name:"Med2",
-        mode:"lines",
-        line: {
-          dash: 'dash' // 線を破線にする
-        },
-        yaxis:"y4"
-      },
-      {
-        x: [TP[2].value * 1000, TP[2].value * 1000],
-        y: [-20, 20],
-        name:"Low1",
-        mode:"lines",
-        line: {
-          dash: 'dash' // 線を破線にする
-        },
-        yaxis:"y4"
-      },
-      {
-        x: [TP[3].value * 1000, TP[3].value * 1000],
+    ];
+    const TP = this.shockService.getTP();
+    TP.forEach((value : rowData, index) => {
+      this.graph.data.push({
+        x: [value.value * 1000, value.value * 1000],
         y: [-20, 20],
         name:"Low2",
         mode:"lines",
@@ -153,8 +131,8 @@ export class MicroComponent {
           dash: 'dash' // 線を破線にする
         },
         yaxis:"y4"
-      },
-    ];
+      });
+    })
   }
   onPlotlyClick(event : any){}
 }

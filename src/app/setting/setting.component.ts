@@ -3,7 +3,7 @@ import { SettingService } from '../setting.service';
 import * as XLSX from 'xlsx';
 import { Papa, ParseResult } from 'ngx-papaparse';
 import * as dfd from 'danfojs';
-import { CompService } from '../comp.service';
+import { CompService, getKappaM, getNameFromM } from '../comp.service';
 import { MicroService } from '../micro.service';
 import { ShockService } from '../shock.service';
 import { FormBuilder, Validators } from '@angular/forms';
@@ -44,12 +44,16 @@ export class SettingComponent implements OnInit {
 
   readExcelFile(file : string) {
     const url = `assets/${file}`; // ShockTube.xlsxのパスを指定
+
     this.http.get(url, { responseType: 'blob' }).subscribe(response => {
       const fileBlob = response as Blob;
       const fileReader = new FileReader();
       fileReader.onload = (e) => {
         const data = new Uint8Array(fileReader.result as ArrayBuffer);
-        this.settingService.setExcelResult(data);
+        const wbresult = XLSX.read(data, { type: 'array' });
+        const sheetName = wbresult.SheetNames[0];
+        const wsresult = wbresult.Sheets[sheetName];
+        this.settingService.setExcelResult(wbresult, wsresult);
       };
       fileReader.readAsArrayBuffer(fileBlob);
     });
@@ -77,7 +81,7 @@ export class SettingComponent implements OnInit {
           co.push(value);
         }
       });
-      if(co.length > 2){
+      if(co.length > 1){
         this.microService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", ...co]}));
       }
     }
@@ -101,18 +105,38 @@ export class SettingComponent implements OnInit {
 
     //setするとイベントが送信される
     this.settingService.setDataFrame(df);
-
-    //初期値の割り当て
+    
+    //dfの割り当て
     this.onSelectedChanged();
-
-    this.progressValue = 80;
 
     //ガスと圧力をShockTube結果から読み込む
     const bind = this.settingService.getResult();
     if(bind != undefined){
-      this.compService.gass = bind;
-      this.compService.setCondition();
+      this.compService.data["kR"] = {value : getKappaM(getNameFromM(bind.R)).kappa, unit:"-"};
+      this.compService.data["kC"] = {value : getKappaM(getNameFromM(bind.C)).kappa, unit:"-"};
+      this.compService.data["kM"] = {value : getKappaM(getNameFromM(bind.M)).kappa, unit : "-"}
+      this.compService.data["kL"] = {value : getKappaM(getNameFromM(bind.L)).kappa, unit : "-"};
+
+      this.compService.data["MR"] = {value : bind.R, unit:"-"};
+      this.compService.data["MC"] = {value : bind.C, unit:"-"};
+      this.compService.data["MM"] = {value : bind.M, unit : "-"}
+      this.compService.data["ML"] = {value : bind.L, unit : "-"};
+
+      this.compService.data["Dth"] = {value : bind.Dth, unit : "mm"};
+      this.compService.data["T0"] = {value : bind.T0, unit : "K"};
+      this.compService.data["Wp"] = {value : bind.Wp, unit : "kg"};
+      this.compService.data["groove"] = {value : bind.groove, unit: "mm"};
+
+      this.compService.data["PR0"] = {value : bind.PR0, unit:"MPa"};
+      this.compService.data["PC0"] = {value : bind.PC0, unit:"kPa"};
+      this.compService.data["PM0"] = {value : bind.PM0, unit : "kPa"}
+      this.compService.data["PL0"] = {value : bind.PL0, unit : "Pa"};
+
+      this.compService.emitEvent("setBindGas")
+      this.compService.calc();
     }
+
+    this.progressValue = 80;
         
     //読み込み終わったら進捗を100％にする
     this.progressValue = 100;
@@ -163,24 +187,31 @@ export class SettingComponent implements OnInit {
     }
     else if(file.name.endsWith(".xlsx")){
       console.log("xlsxを選んだ");
-      dfd.readExcel(file, {sheet: 0}).then((value) => {
-        const df = value as dfd.DataFrame;
-        console.log("comp")
-        this.settingService.setTime(df["t"]);
-        this.compService.setCalculatedData(df);
-      });
-      dfd.readExcel(file, {sheet: 1}).then((value) => {
-        const df = value as dfd.DataFrame;
-        df.print();
-        console.log("shock")
-      
-      });
-      dfd.readExcel(file, {sheet: 2}).then((value) => {
-        const df = value as dfd.DataFrame;
-        df.print();
-        console.log("micro")
 
-      });
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const data = new Uint8Array((event.target as FileReader).result as ArrayBuffer);
+        const wb = XLSX.read(data, { type: 'array' });
+
+        dfd.readExcel(file, {sheet: wb.SheetNames.indexOf("comp")}).then((value) => {
+          console.log("comp")
+          const df = value as dfd.DataFrame;
+          const t = df["t"] as dfd.Series;
+          this.settingService.setTime(t.iloc(["1:"]).asType('float32'));
+          this.compService.setCalculatedData(df);
+        });
+        dfd.readExcel(file, {sheet: wb.SheetNames.indexOf("micro")}).then((value) => {
+          console.log("micro")
+          const df = value as dfd.DataFrame;
+          this.microService.setCalculatedData(df);
+        });
+        dfd.readExcel(file, {sheet: wb.SheetNames.indexOf("shock")}).then((value) => {
+          console.log("shock")
+          const df = value as dfd.DataFrame;
+          this.shockService.setCalculatedData(df);
+        });    
+      };
+      reader.readAsArrayBuffer(file);
     }
   }
 

@@ -3,11 +3,10 @@ import { of } from 'rxjs/internal/observable/of';
 import * as dfd from 'danfojs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
-import { Gass } from './comp/comp.component';
+import { getKappaM } from './comp.service';
 
 export interface Condition{
   Shot:number;
-  bind: Gass;
 }
 
 @Injectable({
@@ -22,7 +21,6 @@ export class SettingService {
   df : dfd.DataFrame = new dfd.DataFrame;
   wbresult: XLSX.WorkBook|undefined;
   wsresult: XLSX.WorkSheet |undefined;
-  condition : Gass|undefined;
   private eventSubject = new Subject<any>;
   t : dfd.Series = new dfd.Series;
 
@@ -33,7 +31,10 @@ export class SettingService {
     this.emitEvent("load");
   }
   getDataFrame(){return this.df;}
-  setTime(t :dfd.Series){this.t = t}
+  setTime(t :dfd.Series){
+    this.t = t
+    this.emitEvent("load")
+  }
   getTime(){return this.t}
 
   updateCHBindProperty(bind: any) {
@@ -63,13 +64,9 @@ export class SettingService {
     console.log(this.excelPartName);
   }
 
-  setExcelResult(data: any){
-    this.wbresult = XLSX.read(data, { type: 'array' });
-    const sheetName = this.wbresult.SheetNames[0];
-    this.wsresult = this.wbresult.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(this.wsresult, { header: 1 });
-    
-    console.log('ShockTube結果:', jsonData);
+  setExcelResult(wb: any, ws :any){
+    this.wbresult = wb;
+    this.wsresult = ws;
   }
 
   findCellByValue(worksheet: XLSX.WorkSheet, value: string) {
@@ -104,6 +101,10 @@ export class SettingService {
       return;
     }
     const rowData = this.findCellByValue(this.wsresult as XLSX.WorkSheet, this.excelPartName);
+    //見つからなかったときのデータ
+    let b ={"R": 28.8, "C": 4, "M": 28, "L": 28.8, 
+    "PR0" :1, "PC0":101.3, "PM0":1,"PL0":10,
+    "Dth": 15, "T0" : 300, "Wp": 0.28, "groove":1};
     if (rowData) {
       console.log('Excelパート名に一致するセルの値:', rowData);
 
@@ -119,12 +120,19 @@ export class SettingService {
         Wp = 0.17;
       }
 
-      const b: Gass = {R: {g:rowData[10], P:rowData[14]}, C:{g:rowData[11], P:rowData[15]}, M:{g:rowData[12], P:rowData[16]}, L:{g:rowData[13], P:rowData[17]}, Dth:rowData[6],
-                       T0 : 300, Wp:Wp, groove:rowData[9]};
-      return b;
+      b = {"R": getKappaM(rowData[10]).M,
+          "C": getKappaM(rowData[11]).M,
+          "M": getKappaM(rowData[12]).M,
+          "L": getKappaM(rowData[13]).M,
+          "Dth":rowData[6],
+          "PR0" :rowData[14],
+          "PC0" :rowData[15],
+          "PM0" : rowData[16],
+          "PL0" : rowData[17],
+          "T0" : 300, "Wp":Wp, "groove":rowData[9]};
     } else {
       console.log('Excelパート名に一致するセルが見つかりませんでした');
     }
-    return undefined;
+    return b;
   }
 }
