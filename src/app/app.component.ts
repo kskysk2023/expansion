@@ -125,17 +125,24 @@ export class AppComponent implements OnInit{
         }
       });
     }
-    if(this.microService.IQ){
-      console.log("圧縮管のデータがある");
+    if(this.microService.PistonData){
       this.graph.data.push({
         x: t,
-        y: this.microService.IQ["P"].values,
-        name:"Power",
+        y: this.microService.PistonData["P"].values,
+        name:"power_p",
         mode:"lines",
-        yaxis:"y3"
+        yaxis:"y3",
       });
     }
-
+    if(this.microService.RuptData){
+      this.graph.data.push({
+        x: t,
+        y: this.microService.RuptData["P"].values,
+        name:"power_r",
+        mode:"lines",
+        yaxis:"y3",
+      });
+    }
   }
 
   onPlotlyClick(event :any){

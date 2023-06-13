@@ -118,7 +118,8 @@ export class ShockService {
     console.log(this.data);
     Object.entries(datas[1]).forEach(([key, value]) => {
       this.data[key].value = value;
-    }) 
+    })
+    this.emitEvent("load")
   }
 
   public write(wb: any): void {

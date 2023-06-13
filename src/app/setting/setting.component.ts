@@ -60,31 +60,23 @@ export class SettingComponent implements OnInit {
     });
   }
 
-  onSelectedChanged(){
-    if(this.bind.compression != undefined){
-      this.compService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", this.bind.compression]}));
+  onSelectedChanged() {
+    const compression = this.bind.compression;
+    const shock = Object.values(this.bind.shock).filter(value => value && value !== "×");
+    const rupture = Object.values(this.bind.rupture).filter(value => value && value !== "×");
+    const piston = Object.values(this.bind.piston).filter(value => value && value !== "×");
+  
+    if (compression !== undefined) {
+      this.compService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", compression] }));
     }
-    if(this.bind.shock){
-      const co:string[] = [];
-      Object.values(this.bind.shock).forEach((value) => {
-        if(value && value != "×"){
-          co.push(value);
-        }
-      });
-      if(co.length > 1){
-        this.shockService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", ...co]}));
-      }
+    if (shock.length > 1) {
+      this.shockService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...shock] }));
     }
-    if(this.bind.rupture){
-      const co:string[] = [];
-      Object.values(this.bind.rupture).forEach((value) => {
-        if(value && value != "×"){
-          co.push(value);
-        }
-      });
-      if(co.length > 1){
-        this.microService.SetData(this.settingService.getDataFrame().loc({columns: ["時間[s]", ...co]}));
-      }
+    if (rupture.length > 1) {
+      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...rupture] }), "rupture");
+    }
+    if (piston.length > 1) {
+      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...piston] }), "piston");
     }
   }
 
@@ -230,9 +222,12 @@ export class SettingComponent implements OnInit {
               this.settingService.setTime(t.iloc(["1:"]).asType('float32'));
               this.compService.setCalculatedData(sheetData);
               break;
-            case "micro":
-              this.microService.setCalculatedData(sheetData);
+            case "piston":
+              this.microService.setCalculatedData(sheetData, "piston");
               break;
+            case "rupture":
+              this.microService.setCalculatedData(sheetData, "rupture")
+              break;    
             case "shock":
               this.shockService.setCalculatedData(sheetData);
               break;
@@ -249,7 +244,8 @@ export class SettingComponent implements OnInit {
     const wb = XLSX.utils.book_new();
 
     this.compService.write(wb);
-    this.microService.write(wb);
+    this.microService.write(wb, "piston");
+    this.microService.write(wb, "rupture");
     this.shockService.write(wb);
     const wbout = XLSX.write(wb, {bookType: "xlsx", type:"array"});
     const blob = new Blob([wbout], { type: 'application/octet-stream' });

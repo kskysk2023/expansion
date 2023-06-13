@@ -13,7 +13,7 @@ import { rowData } from '../app.component';
 export class MicroComponent {
   graph = {
     data : [
-      { x: [0], y: [0], mode: 'scatter', yaxis:"y1" , name:"", line:{dash:'solid'}},
+      { x: [] as number[], y: [] as number[], mode: 'scatter', yaxis:"y1" , name:"", line:{dash:'solid'}},
     ],
     layout : {
       font: { family: "Times new Roman", size: 16, color: "#000" },
@@ -81,51 +81,66 @@ export class MicroComponent {
   }
 
   load(){
-    if(this.compService.Pc == undefined){
-      console.log("comp Pcが計算されていない")
-      return;
-    }
-    if(this.microService.IQ == undefined){
-      console.log("micro IQが計算されていない")
-      return;
-    }
-
     this.settingService.getTime().print();
     const t = this.settingService.getTime().mul(1000).values as number[];
     console.log(t[0])
     
-    this.graph.data = [
-      {
+    //reset
+    this.graph.data = [{ x: [] as number[], y: [] as number[], mode: 'scatter', yaxis:"y1" ,name:"", line : {dash:"solid"}}];
+
+    if(this.compService.Pc){
+      this.graph.data.push({
+          x: t,
+          y: this.compService.Pc["Pc"].values,
+          name:"圧縮",
+          mode:'lines',
+          yaxis:"y1",
+          line:{dash:"solid"}
+      });
+    }
+    if(this.microService.PistonData){
+      this.graph.data.push({
         x: t,
-        y: this.compService.Pc["Pc"].values,
-        name:"圧縮",
-        mode:'lines',
-        yaxis:"y1",
-        line:{dash:"solid"}
-      },
-      {
-        x: t,
-        y: this.microService.IQ["x"].values,
+        y: this.microService.PistonData["x"].values,
         name:"xp",
         mode:"lines",
         yaxis:"y2",
         line:{dash:"solid"}
-      },
-      {
+      },      {
         x: t,
-        y: this.microService.IQ["P"].values,
-        name:"power",
+        y: this.microService.PistonData["P"].values,
+        name:"power_p",
         mode:"lines",
         yaxis:"y3",
         line:{dash:"solid"}
-      },
-    ];
+      });
+    }
+    if(this.microService.RuptData){
+      this.graph.data.push({
+        x: t,
+        y: this.microService.RuptData["x"].values,
+        name:"xr",
+        mode:"lines",
+        yaxis:"y2",
+        line:{dash:"solid"}
+      },      {
+        x: t,
+        y: this.microService.RuptData["P"].values,
+        name:"power_r",
+        mode:"lines",
+        yaxis:"y3",
+        line:{dash:"solid"}
+      });
+    }    
+
     const TP = this.shockService.getTP();
     TP.forEach((value : rowData, index) => {
+      let name = index < 2?"Low":"Med";
+      name = name + ((index % 2) + 1).toString();
       this.graph.data.push({
         x: [value.value * 1000, value.value * 1000],
         y: [-20, 20],
-        name:"Low2",
+        name,
         mode:"lines",
         line: {
           dash: 'dash' // 線を破線にする
