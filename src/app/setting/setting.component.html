@@ -18,25 +18,25 @@
       </mat-form-field>
       <mat-form-field>
         <mat-label>中圧管1センサ</mat-label>
-        <mat-select [(value)]="this.bind.shock.m1"(selectionChange)="onSelectedChanged()">
+        <mat-select [(value)]="this.bind.shock['m1']"(selectionChange)="onSelectedChanged()">
           <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>中圧管2センサ</mat-label>
-        <mat-select [(value)]="this.bind.shock.m2"(selectionChange)="onSelectedChanged()">
+        <mat-select [(value)]="this.bind.shock['m2']"(selectionChange)="onSelectedChanged()">
           <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>低圧管1センサ</mat-label>
-        <mat-select [(value)]="this.bind.shock.l1"(selectionChange)="onSelectedChanged()">
+        <mat-select [(value)]="this.bind.shock['l1']"(selectionChange)="onSelectedChanged()">
           <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field>
         <mat-label>低圧管2センサ</mat-label>
-        <mat-select [(value)]="this.bind.shock.l2"(selectionChange)="onSelectedChanged()">
+        <mat-select [(value)]="this.bind.shock['l2']"(selectionChange)="onSelectedChanged()">
           <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
         </mat-select>
       </mat-form-field>

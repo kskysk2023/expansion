@@ -7,6 +7,7 @@ import * as XLSX from "xlsx";
 })
 export class MicroService implements OnInit {
   public IQ: dfd.DataFrame | undefined;
+  public ruptIQ: dfd.DataFrame | undefined;
   private num: number | undefined;
   private tati :number = 0;
   private ts: number | undefined;

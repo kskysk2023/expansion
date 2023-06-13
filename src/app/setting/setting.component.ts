@@ -10,7 +10,8 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 export interface Bind {
   compression: string,
-  shock : {m1: string, m2: string, l1: string, l2: string},
+  shock: { [key: string]: string },
+  //shock : {m1: string, m2: string, l1: string, l2: string},
   piston : {I:string, Q: string},
   rupture : {I: string, Q: string}
 }
@@ -103,6 +104,24 @@ export class SettingComponent implements OnInit {
     this.CHs = df.columns;
     this.CHs.push("×")
 
+    const properties = ['m1', 'm2', 'l1', 'l2']; // `shock` オブジェクトのプロパティ名のリスト
+    this.bind.compression = this.CHs[1];
+    console.log(this.CHs)
+    for (let i = 2; i < this.CHs.length - 1; i++) {
+      const ch = this.CHs[i];
+
+      if (i <= 5) {
+        const property = properties[i - 2];
+        this.bind.shock[property] = ch;
+      } else if (i <= 7) {
+        const property = i === 6 ? 'I' : 'Q';
+        this.bind.piston[property] = ch;
+      } else if (i <= 9) {
+        const property = i === 8 ? 'I' : 'Q';
+        this.bind.rupture[property] = ch;
+      }
+    }
+
     //setするとイベントが送信される
     this.settingService.setDataFrame(df);
     
@@ -185,31 +204,42 @@ export class SettingComponent implements OnInit {
     else if (file.name.endsWith(".MEM")){
       console.log("MEMを読み込んだ" + file.name);
     }
-    else if(file.name.endsWith(".xlsx")){
+    else if (file.name.endsWith(".xlsx")) {
       console.log("xlsxを選んだ");
-
+    
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const data = new Uint8Array((event.target as FileReader).result as ArrayBuffer);
         const wb = XLSX.read(data, { type: 'array' });
-
-        dfd.readExcel(file, {sheet: wb.SheetNames.indexOf("comp")}).then((value) => {
-          console.log("comp")
-          const df = value as dfd.DataFrame;
-          const t = df["t"] as dfd.Series;
-          this.settingService.setTime(t.iloc(["1:"]).asType('float32'));
-          this.compService.setCalculatedData(df);
+        const sheetNames = wb.SheetNames;
+    
+        const readSheetPromises = sheetNames.map((sheetName) => {
+          return dfd.readExcel(file, { sheet: wb.SheetNames.indexOf(sheetName) });
         });
-        dfd.readExcel(file, {sheet: wb.SheetNames.indexOf("micro")}).then((value) => {
-          console.log("micro")
-          const df = value as dfd.DataFrame;
-          this.microService.setCalculatedData(df);
-        });
-        dfd.readExcel(file, {sheet: wb.SheetNames.indexOf("shock")}).then((value) => {
-          console.log("shock")
-          const df = value as dfd.DataFrame;
-          this.shockService.setCalculatedData(df);
-        });    
+    
+        const sheetDataList = await Promise.all(readSheetPromises);
+    
+        for (let i = 0; i < sheetDataList.length; i++) {
+          const sheetData = sheetDataList[i] as dfd.DataFrame;
+          const sheetName = sheetNames[i];
+    
+          console.log(sheetName);
+          switch (sheetName) {
+            case "comp":
+              const t = sheetData["t"] as dfd.Series;
+              this.settingService.setTime(t.iloc(["1:"]).asType('float32'));
+              this.compService.setCalculatedData(sheetData);
+              break;
+            case "micro":
+              this.microService.setCalculatedData(sheetData);
+              break;
+            case "shock":
+              this.shockService.setCalculatedData(sheetData);
+              break;
+            default:
+              break;
+          }
+        }
       };
       reader.readAsArrayBuffer(file);
     }
