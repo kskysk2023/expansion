@@ -48,6 +48,22 @@
     <span matTextSuffix>mm</span>
 </mat-form-field>
 <mat-form-field>
+    <mat-label>第一隔膜</mat-label>
+    <mat-select [(value)]="this.diaphragm" (selectionChange)="onSelectedChanged()">
+        <mat-option *ngFor="let matd of ['Al','spcc', 'PLA', 'ABS']" [value]="matd">{{matd}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>第一隔膜の溝深さ</mat-label>
+    <input matInput type="number" [(ngModel)]="this.compService.data['groove'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>mm</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>第二隔膜厚さ</mat-label>
+    <input matInput type="number" [(ngModel)]="this.compService.data['td2'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>μm</span>
+</mat-form-field>
+<mat-form-field>
     <mat-label>温度 T0</mat-label>
     <input matInput type="number" [(ngModel)]="this.compService.data['T0'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>K</span>

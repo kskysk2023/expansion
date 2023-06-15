@@ -113,7 +113,7 @@ export class MicroService implements OnInit {
     } else {
       this.ts = 0;
     }
-    //this.v = dfd.DataFrame(this.x).diff({ periods: 1, axis: 0 }).div(this.ts).values[0];
+    //data["v"] = data["x"].diff({ periods: 1, axis: 0 }).div(this.ts).values[0];
   
     data.print();
   

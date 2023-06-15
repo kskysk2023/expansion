@@ -57,20 +57,22 @@ export class CompService {
   private eventSubject = new Subject<any>;
 
   constructor() {
-    this.data["Dth"] = {value : 15, unit:"mm"}
-    this.data["T0"] = {value : 300, unit:"kC"},
-    this.data["Wp"] = {value : 0.28, unit : "kg"},
-    this.data["groove"] = {value : 1.00, unit : "mm"}
+    this.data["Dth"] = {value : NaN, unit:"mm"}
+    this.data["T0"] = {value : NaN, unit:"kC"},
+    this.data["Wp"] = {value : NaN, unit : "kg"},
+    this.data["groove"] = {value : NaN, unit : "mm"}
+    this.data["td2"] = {value : NaN, unit : "mm"}
 
-    this.data["PR0"] = {value : 1, unit : "MPa"}
-    this.data["PC0"] = {value : 101.3, unit : "kPa"}
-    this.data["PM0"] = {value : 1, unit : "kPa"}
-    this.data["PL0"] = {value : 100, unit : "Pa"}
 
-    this.data["MR"] = {value : 1, unit : "-"}
-    this.data["MC"] = {value : 10, unit : "-"}
-    this.data["MM"] = {value : 1, unit : "-"}
-    this.data["ML"] = {value : 10, unit : "-"}
+    this.data["PR0"] = {value : NaN, unit : "MPa"}
+    this.data["PC0"] = {value : NaN, unit : "kPa"}
+    this.data["PM0"] = {value : NaN, unit : "kPa"}
+    this.data["PL0"] = {value :NaN, unit : "Pa"}
+
+    this.data["MR"] = {value : NaN, unit : "-"}
+    this.data["MC"] = {value : NaN, unit : "-"}
+    this.data["MM"] = {value : NaN, unit : "-"}
+    this.data["ML"] = {value : NaN, unit : "-"}
   }
 
   getEvent(){
@@ -116,7 +118,6 @@ export class CompService {
   public setCalculatedData(data : dfd.DataFrame){
     this.Pc = data.iloc({columns: ["0:3"], rows:["1:"]})
     const datas = dfd.toJSON(data.iloc({columns:["3:"], rows: ["0:2"] })) as rowData[];
-    const gass = data.iloc({columns:["3:8"], rows: ["3:5"]});
     
     Object.entries(datas[0]).forEach(([key, unit]) => {
       this.data[key] = {value: 0, unit : unit};

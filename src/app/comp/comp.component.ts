@@ -9,9 +9,9 @@ import { SettingService } from '../setting.service';
 })
 export class CompComponent implements AfterViewInit{
   displayedColumns: string[] = ['name', 'value', 'unit'];
-  GasName : string[] = ["Air", "N2", "He"];
-  bindGas = ["Air", "He", "Air", "Air"]
-
+  GasName : string[] = ["Air", "N2", "He", "×"];
+  bindGas = ["Air", "He", "Air", "Air"];
+  diaphragm = ""
   constructor(public compService : CompService, public settingService: SettingService){}
   ngAfterViewInit(){ 
     this.compService.getEvent().subscribe((value) => {
@@ -33,6 +33,8 @@ export class CompComponent implements AfterViewInit{
     this.compService.data["kC"] = {value: getKappaM(this.bindGas[1]).kappa, unit : "-"};
     this.compService.data["kM"] = {value: getKappaM(this.bindGas[2]).kappa, unit : "-"};
     this.compService.data["kL"] = {value: getKappaM(this.bindGas[3]).kappa, unit : "-"};
+  
+    this.compService.data["matd1"] = {value: this.settingService.mats.indexOf(this.diaphragm), unit : "-"};
     this.compService.calc()
   }
 }

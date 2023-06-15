@@ -123,25 +123,7 @@ export class SettingComponent implements OnInit {
     //ガスと圧力をShockTube結果から読み込む
     const bind = this.settingService.getResult();
     if(bind != undefined){
-      this.compService.data["kR"] = {value : getKappaM(getNameFromM(bind.R)).kappa, unit:"-"};
-      this.compService.data["kC"] = {value : getKappaM(getNameFromM(bind.C)).kappa, unit:"-"};
-      this.compService.data["kM"] = {value : getKappaM(getNameFromM(bind.M)).kappa, unit : "-"}
-      this.compService.data["kL"] = {value : getKappaM(getNameFromM(bind.L)).kappa, unit : "-"};
-
-      this.compService.data["MR"] = {value : bind.R, unit:"-"};
-      this.compService.data["MC"] = {value : bind.C, unit:"-"};
-      this.compService.data["MM"] = {value : bind.M, unit : "-"}
-      this.compService.data["ML"] = {value : bind.L, unit : "-"};
-
-      this.compService.data["Dth"] = {value : bind.Dth, unit : "mm"};
-      this.compService.data["T0"] = {value : bind.T0, unit : "K"};
-      this.compService.data["Wp"] = {value : bind.Wp, unit : "kg"};
-      this.compService.data["groove"] = {value : bind.groove, unit: "mm"};
-
-      this.compService.data["PR0"] = {value : bind.PR0, unit:"MPa"};
-      this.compService.data["PC0"] = {value : bind.PC0, unit:"kPa"};
-      this.compService.data["PM0"] = {value : bind.PM0, unit : "kPa"}
-      this.compService.data["PL0"] = {value : bind.PL0, unit : "Pa"};
+      this.compService.data = bind;
 
       this.compService.emitEvent("setBindGas")
       this.compService.calc();
