@@ -1,4 +1,3 @@
-
 <head>
   <meta charset="UTF-8" />
 </head>
@@ -14,19 +13,19 @@
   </a>
 </mat-toolbar>
 
-<app-setting></app-setting>
-
-<!-- Next Steps -->
-<mat-card class="card">
-  <mat-card-actions>
-    <plotly-plot [data]="graph.data" [layout]="graph.layout" [config]="graph.config" (plotlyClick)="onPlotlyClick($event)"></plotly-plot>
-  </mat-card-actions>
-</mat-card>
-
-<app-shock></app-shock>
-
-<app-comp></app-comp>
-
-<app-micro></app-micro>
+<nav mat-tab-nav-bar>
+  <a mat-tab-link
+     [routerLink]="['/prepare']"
+     routerLinkActive #rla1="routerLinkActive"
+     [active]="rla1.isActive">
+    実験条件
+  </a>
+  <a mat-tab-link
+     [routerLink]="['/result']"
+     routerLinkActive #rla2="routerLinkActive"
+     [active]="rla2.isActive">
+    実験結果
+  </a>
+</nav>
 
 <router-outlet></router-outlet>

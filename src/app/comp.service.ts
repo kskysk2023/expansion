@@ -53,7 +53,7 @@ export class CompService {
   private t_hold_start: number = 0;
   private t_hold_end: number = 0;
   dataComp = new ReplaySubject<rowData[]>;
-  data : {[key : string]: {value: number, unit : string}} = {};
+  public data : {[key : string]: {value: number, unit : string}} = {};
   private eventSubject = new Subject<any>;
 
   constructor() {

@@ -24,6 +24,9 @@ import { CompComponent } from './comp/comp.component';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
 import { MicroComponent } from './micro/micro.component';
+import { PrepareComponent } from './prepare/prepare.component';
+import { ResultComponent } from './result/result.component';
+import {MatTabsModule} from '@angular/material/tabs';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -35,6 +38,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     ShockComponent,
     CompComponent,
     MicroComponent,
+    PrepareComponent,
+    ResultComponent,
   ],
   imports: [
     BrowserModule,
@@ -57,6 +62,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,
+    MatTabsModule
   ],
   exports: [
     MatStepperModule

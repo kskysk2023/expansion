@@ -1,0 +1,75 @@
+<mat-form-field>
+    <mat-label>貯気槽のガス</mat-label>
+    <mat-select [(value)]="this.bindGas[0]" (selectionChange)="onSelectedChanged()">
+        <mat-option *ngFor="let gas of this.GasName" [value]="gas">{{gas}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>貯気槽圧PR0 MPa</mat-label>
+    <input matInput type="number" [(ngModel)]="this.compService.data['PR0'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>MPa</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>圧縮管のガス</mat-label>
+    <mat-select [(value)]="this.bindGas[1]" (selectionChange)="onSelectedChanged()">
+        <mat-option *ngFor="let gas of this.GasName" [value]="gas">{{gas}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>圧縮管圧PC0 kPa</mat-label>
+    <input matInput type="number"[(ngModel)]="this.compService.data['PC0'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>kPa</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>中圧管ガス</mat-label>
+    <mat-select [(value)]="this.bindGas[2]" (selectionChange)="onSelectedChanged()">
+        <mat-option *ngFor="let gas of this.GasName" [value]="gas">{{gas}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>中圧管圧PM0 kPa</mat-label>
+    <input matInput type="number"[(ngModel)]="this.compService.data['PM0'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>kPa</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>低圧管ガス</mat-label>
+    <mat-select [(value)]="this.bindGas[3]" (selectionChange)="onSelectedChanged()">
+        <mat-option *ngFor="let gas of this.GasName" [value]="gas">{{gas}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>低圧管圧PL0 Pa</mat-label>
+    <input matInput type="number"[(ngModel)]="this.compService.data['PL0'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>Pa</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>スロート径 D*</mat-label>
+    <input matInput type="number" [(ngModel)]="this.compService.data['Dth'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>mm</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>第一隔膜</mat-label>
+    <mat-select [(value)]="this.diaphragm" (selectionChange)="onSelectedChanged()">
+        <mat-option *ngFor="let matd of ['Al','spcc', 'PLA', 'ABS']" [value]="matd">{{matd}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>第一隔膜の溝深さ</mat-label>
+    <input matInput type="number" [(ngModel)]="this.compService.data['groove'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>mm</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>第二隔膜厚さ</mat-label>
+    <input matInput type="number" [(ngModel)]="this.compService.data['td2'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>μm</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>温度 T0</mat-label>
+    <input matInput type="number" [(ngModel)]="this.compService.data['T0'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>K</span>
+</mat-form-field>
+<mat-form-field>
+    <mat-label>ピストン質量 Wp</mat-label>
+    <input matInput type="number" [(ngModel)]="this.compService.data['Wp'].value" (change)="onSelectedChanged()">
+    <span matTextSuffix>kg</span>
+</mat-form-field>
