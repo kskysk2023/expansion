@@ -12,3 +12,8 @@
     width: 200px; /* font-size と同じ値に設定します */
     height: 200px; /* font-size と同じ値に設定します */
 }
+.binds{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}

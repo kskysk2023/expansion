@@ -6,7 +6,7 @@
 </mat-form-field>
 <mat-form-field>
     <mat-label>貯気槽圧PR0 MPa</mat-label>
-    <input matInput type="number" [(ngModel)]="this.compService.data['PR0'].value" (change)="onSelectedChanged()">
+    <input matInput type="number" [(ngModel)]="this.data['PR0'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>MPa</span>
 </mat-form-field>
 <mat-form-field>
@@ -17,7 +17,7 @@
 </mat-form-field>
 <mat-form-field>
     <mat-label>圧縮管圧PC0 kPa</mat-label>
-    <input matInput type="number"[(ngModel)]="this.compService.data['PC0'].value" (change)="onSelectedChanged()">
+    <input matInput type="number"[(ngModel)]="this.data['PC0'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>kPa</span>
 </mat-form-field>
 <mat-form-field>
@@ -28,7 +28,7 @@
 </mat-form-field>
 <mat-form-field>
     <mat-label>中圧管圧PM0 kPa</mat-label>
-    <input matInput type="number"[(ngModel)]="this.compService.data['PM0'].value" (change)="onSelectedChanged()">
+    <input matInput type="number"[(ngModel)]="this.data['PM0'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>kPa</span>
 </mat-form-field>
 <mat-form-field>
@@ -39,12 +39,12 @@
 </mat-form-field>
 <mat-form-field>
     <mat-label>低圧管圧PL0 Pa</mat-label>
-    <input matInput type="number"[(ngModel)]="this.compService.data['PL0'].value" (change)="onSelectedChanged()">
+    <input matInput type="number"[(ngModel)]="this.data['PL0'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>Pa</span>
 </mat-form-field>
 <mat-form-field>
     <mat-label>スロート径 D*</mat-label>
-    <input matInput type="number" [(ngModel)]="this.compService.data['Dth'].value" (change)="onSelectedChanged()">
+    <input matInput type="number" [(ngModel)]="this.data['Dth'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>mm</span>
 </mat-form-field>
 <mat-form-field>
@@ -55,30 +55,48 @@
 </mat-form-field>
 <mat-form-field>
     <mat-label>第一隔膜の溝深さ</mat-label>
-    <input matInput type="number" [(ngModel)]="this.compService.data['groove'].value" (change)="onSelectedChanged()">
+    <input matInput type="number" [(ngModel)]="this.data['groove'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>mm</span>
 </mat-form-field>
 <mat-form-field>
     <mat-label>第二隔膜厚さ</mat-label>
-    <input matInput type="number" [(ngModel)]="this.compService.data['td2'].value" (change)="onSelectedChanged()">
+    <input matInput type="number" [(ngModel)]="this.data['td2'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>μm</span>
 </mat-form-field>
 <mat-form-field>
     <mat-label>温度 T0</mat-label>
-    <input matInput type="number" [(ngModel)]="this.compService.data['T0'].value" (change)="onSelectedChanged()">
+    <input matInput type="number" [(ngModel)]="this.data['T0'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>K</span>
 </mat-form-field>
 <mat-form-field>
     <mat-label>ピストン質量 Wp</mat-label>
-    <input matInput type="number" [(ngModel)]="this.compService.data['Wp'].value" (change)="onSelectedChanged()">
+    <input matInput type="number" [(ngModel)]="this.data['Wp'].value" (change)="onSelectedChanged()">
     <span matTextSuffix>kg</span>
 </mat-form-field>
 
-<div class="launch_button">
-    <button mat-fab color="primary" aria-label="arm" (click)="onButtonClick('arm')">
-        <mat-icon>warning</mat-icon>
+<div class="binds">
+    <mat-form-field  *ngFor="let bind of binds; let i = index">
+        <mat-label>{{bind.name}}</mat-label>
+        <mat-select [(value)]="bind.role" (selectionChange)="onSelectedChanged()">
+        <mat-option *ngFor="let role of this.CHroles" [value]="role">{{role}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+
+<div >
+    <button mat-fab color="primary" aria-label="arm" (click)="onSaveClick()">
+        <mat-icon fontSet="material-icons-outlined">save</mat-icon>
     </button>
-    <button mat-fab color="primary" aria-label="Fire" (click)="onButtonClick('fire')">
-        <mat-icon>rocket_launch</mat-icon>
+</div>
+
+<div class="launch_button">
+    <button *ngIf="!this.armed" mat-fab color="primary" aria-label="arm" (click)="onButtonClick('arm')">
+        <mat-icon fontSet="material-icons-outlined">warning</mat-icon>
+    </button>
+    <button mat-fab *ngIf="this.armed" color="alert" aria-label="arm" (click)="onButtonClick('arm')">
+        <mat-icon fontSet="material-icons-outlined">warning</mat-icon>
+    </button>
+    <button mat-fab color="primary" aria-label="Fire" [disabled]="!this.armed" (click)="onButtonClick('fire')">
+        <mat-icon fontSet="material-icons-outlined">rocket_launch</mat-icon>
     </button>
 </div>
