@@ -21,3 +21,7 @@ display: flex;
 align-items: center;
 transition: all 0.2s ease-in-out;
 }
+.download_button button {
+    /* ボタン自体のサイズを調整します */
+    size : 100px;
+}

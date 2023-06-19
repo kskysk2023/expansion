@@ -75,7 +75,10 @@
 </mat-form-field>
 
 <div class="launch_button">
-<button aria-label="Fire" (click)="onButtonClick()">
-    <mat-icon fontSet="material-icons">rocket_launch</mat-icon>
-</button>
+    <button mat-fab color="primary" aria-label="arm" (click)="onButtonClick('arm')">
+        <mat-icon>warning</mat-icon>
+    </button>
+    <button mat-fab color="primary" aria-label="Fire" (click)="onButtonClick('fire')">
+        <mat-icon>rocket_launch</mat-icon>
+    </button>
 </div>

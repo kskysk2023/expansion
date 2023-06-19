@@ -1,3 +1,14 @@
-.launch_button {
-    size: 500px;
+.launch_button button {
+    /* ボタン自体のサイズを調整します */
+    width: 200px;
+    height: 200px;
+    padding: 0; /* 余白を消すためにパディングをゼロにします */
+
+}
+
+.launch_button mat-icon {
+    /* アイコン自体のサイズを調整します */
+    font-size: 200px; /* この値は例です。必要に応じて変更してください */
+    width: 200px; /* font-size と同じ値に設定します */
+    height: 200px; /* font-size と同じ値に設定します */
 }

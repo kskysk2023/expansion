@@ -27,6 +27,7 @@ import { MicroComponent } from './micro/micro.component';
 import { PrepareComponent } from './prepare/prepare.component';
 import { ResultComponent } from './result/result.component';
 import {MatTabsModule} from '@angular/material/tabs';
+import {MatButtonModule} from '@angular/material/button'; 
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -62,7 +63,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,
-    MatTabsModule
+    MatTabsModule,
+    MatButtonModule
   ],
   exports: [
     MatStepperModule

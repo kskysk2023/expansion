@@ -27,10 +27,18 @@ export class PrepareComponent {
     const piston = Object.values(this.bind.piston).filter(value => value && value !== "×");
   }
 
-  onButtonClick(){
-    const data = { message : "push"};
-    this.http.post("/buttonClicked", data, {headers: { 'Content-Type' : 'application/json' }}).subscribe(response => {
-      console.log(response)
-    })
+  onButtonClick(name : string){
+    switch(name){
+      case "arm":
+        this.http.post("/buttonClicked", { message : "arm"}, {headers: { 'Content-Type' : 'application/json' }}).subscribe(response => {
+          console.log(response)
+        });
+        break;
+      case "fire":
+        this.http.post("/buttonClicked", { message : "fire"}, {headers: { 'Content-Type' : 'application/json' }}).subscribe(response => {
+          console.log(response)
+        });
+        break;
+    }
   }
 }
