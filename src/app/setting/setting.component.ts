@@ -8,13 +8,7 @@ import { MicroService } from '../micro.service';
 import { ShockService } from '../shock.service';
 import { FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-export interface Bind {
-  compression: string,
-  shock: { [key: string]: string },
-  //shock : {m1: string, m2: string, l1: string, l2: string},
-  piston : {I:string, Q: string},
-  rupture : {I: string, Q: string}
-}
+import { CHroles } from '../prepare/prepare.component';
 
 @Component({
   selector: 'app-setting',
@@ -28,13 +22,8 @@ export class SettingComponent implements OnInit {
     firstCtrl: ['', Validators.required]
   });
   public CHs :string[] = [];
-  bind :Bind = {
-    compression: "CH1-1[V]",
-    shock :{m1: "×", m2: "×", l1: "×", l2: "×"},
-    piston : {I: "×", Q: "×"},
-    rupture : {I: "×", Q: "×"}
-  }
-
+  binds : {name: string, role:string}[]= [];
+  CHroles = CHroles;
   constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, private formBuilder: FormBuilder,
               public microService : MicroService, public shockService : ShockService, private http: HttpClient){
 
@@ -61,22 +50,22 @@ export class SettingComponent implements OnInit {
   }
 
   onSelectedChanged() {
-    const compression = this.bind.compression;
-    const shock = Object.values(this.bind.shock).filter(value => value && value !== "×");
-    const rupture = Object.values(this.bind.rupture).filter(value => value && value !== "×");
-    const piston = Object.values(this.bind.piston).filter(value => value && value !== "×");
-  
+    const compression = this.binds.filter((value, index) => value.role == "Pc");
+    const shock = this.binds.filter(value => ["m1", "m2", "l1", "l2", "pitot"].includes(value.role));
+    const rupture =this.binds.filter(value => ["rI", "rQ"].includes(value.role));
+    const piston = this.binds.filter(value => ["pI", "pQ2"].includes(value.role));
+    console.log(["時間[s]", ...compression.map(value => value.name)])
     if (compression !== undefined) {
-      this.compService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", compression] }));
+      this.compService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...compression.map(value => value.name)] }));
     }
     if (shock.length > 1) {
-      this.shockService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...shock] }));
+      this.shockService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...shock.map(v => v.name)] }));
     }
     if (rupture.length > 1) {
-      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...rupture] }), "rupture");
+      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...rupture.map(v => v.name)] }), "rupture");
     }
     if (piston.length > 1) {
-      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...piston] }), "piston");
+      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...piston.map(v => v.name)] }), "piston");
     }
   }
 
@@ -93,26 +82,16 @@ export class SettingComponent implements OnInit {
     this.progressValue = 70;
 
     //メニューにchを登録
-    this.CHs = df.columns;
-    this.CHs.push("×")
+    this.CHs = Array.from(df.columns);
+    this.CHs.splice(this.CHs.indexOf("時間[s]"), 1);
 
-    const properties = ['m1', 'm2', 'l1', 'l2']; // `shock` オブジェクトのプロパティ名のリスト
-    this.bind.compression = this.CHs[1];
-    console.log(this.CHs)
-    for (let i = 2; i < this.CHs.length - 1; i++) {
-      const ch = this.CHs[i];
-
-      if (i <= 5) {
-        const property = properties[i - 2];
-        this.bind.shock[property] = ch;
-      } else if (i <= 7) {
-        const property = i === 6 ? 'I' : 'Q';
-        this.bind.piston[property] = ch;
-      } else if (i <= 9) {
-        const property = i === 8 ? 'I' : 'Q';
-        this.bind.rupture[property] = ch;
+    this.CHs.forEach((value, index) => {
+      let role = "×"
+      if(index < CHroles.length){
+        role = CHroles[index];
       }
-    }
+      this.binds.push({name: value, role});
+    })
 
     //setするとイベントが送信される
     this.settingService.setDataFrame(df);

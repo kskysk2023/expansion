@@ -11,6 +11,7 @@ export class CompComponent implements AfterViewInit{
   displayedColumns: string[] = ['name', 'value', 'unit'];
   GasName : string[] = ["Air", "N2", "He", "×"];
   bindGas = ["Air", "He", "Air", "Air"];
+  matd1s = ['Al','spcc', 'PLA', 'ABS'];
   diaphragm = ""
   constructor(public compService : CompService, public settingService: SettingService){}
   ngAfterViewInit(){ 
@@ -21,6 +22,7 @@ export class CompComponent implements AfterViewInit{
         this.bindGas[2] = getNameFromM(this.compService.data["MM"].value)
         this.bindGas[3] = getNameFromM(this.compService.data["ML"].value)
       }
+      this.diaphragm = this.matd1s[this.compService.data["matd1"].value];
     })
   }
   onSelectedChanged(){

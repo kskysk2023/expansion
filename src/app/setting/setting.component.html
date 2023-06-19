@@ -10,63 +10,14 @@
     </mat-step>
     
     <mat-step label="圧力のCHを割り当て">
-      <mat-form-field>
-        <mat-label>圧縮管圧力センサ</mat-label>
-        <mat-select [(value)]="this.bind.compression" (selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>中圧管1センサ</mat-label>
-        <mat-select [(value)]="this.bind.shock['m1']"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>中圧管2センサ</mat-label>
-        <mat-select [(value)]="this.bind.shock['m2']"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>低圧管1センサ</mat-label>
-        <mat-select [(value)]="this.bind.shock['l1']"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>低圧管2センサ</mat-label>
-        <mat-select [(value)]="this.bind.shock['l2']"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </mat-step>
-
-    <mat-step label="マイクロ波のCHを割り当て">
-      <mat-form-field>
-        <mat-label>ピストンI</mat-label>
-        <mat-select [(value)]="bind.piston.I" (selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>ピストンQ</mat-label>
-        <mat-select [(value)]="bind.piston.Q"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>破膜I</mat-label>
-        <mat-select [(value)]="bind.rupture.I"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>破膜Q</mat-label>
-        <mat-select [(value)]="bind.rupture.Q"(selectionChange)="onSelectedChanged()">
-          <mat-option *ngFor="let CH of this.CHs" [value]="CH">{{CH}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div class="binds">
+        <mat-form-field  *ngFor="let bind of binds; let i = index">
+            <mat-label>{{bind.name}}</mat-label>
+            <mat-select [(value)]="bind.role" (selectionChange)="onSelectedChanged()">
+            <mat-option *ngFor="let role of CHroles" [value]="role">{{role}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
     </mat-step>
 
     <mat-step label="ダウンロード">

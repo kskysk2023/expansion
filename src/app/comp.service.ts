@@ -62,6 +62,7 @@ export class CompService {
     this.data["Wp"] = {value : NaN, unit : "kg"},
     this.data["groove"] = {value : NaN, unit : "mm"}
     this.data["td2"] = {value : NaN, unit : "mm"}
+    this.data["matd1"] = {value : NaN, unit : "-"}
 
 
     this.data["PR0"] = {value : NaN, unit : "MPa"}
@@ -87,8 +88,10 @@ export class CompService {
     this.Pc = V_Pc;
     console.log("V_Pc...");
     V_Pc.print();
-    console.log("Pc... ");
-    this.Pc.addColumn("Pc", this.Pc["CH1-1[V]"].add(1.4).mul(25.482), {inplace:true});
+
+    const secondColumn = V_Pc.columns[1];
+    console.log(secondColumn)
+    this.Pc.addColumn("Pc", this.Pc.column(secondColumn).add(1.4).mul(25.482), {inplace:true});
     this.Pc = this.Pc.rename({"時間[s]":"t", 1: "Pc"});
     console.log("Pc....");
     this.Pc.print();

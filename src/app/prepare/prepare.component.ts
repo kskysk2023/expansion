@@ -1,10 +1,8 @@
 import { Component } from '@angular/core';
-import { Bind } from '../setting/setting.component';
 import { CompService } from '../comp.service';
 import { HttpClient } from '@angular/common/http';
 import { SettingService } from '../setting.service';
-import { FormBuilder, Validators } from '@angular/forms';
-
+export const CHroles : string[] = ["Pc", "m1", "m2", "l1", "l2", "pI", "pQ", "rI", "rQ", "pitot", "×"];
 @Component({
   selector: 'app-prepare',
   templateUrl: './prepare.component.html',
@@ -15,7 +13,7 @@ export class PrepareComponent {
   GasName : string[] = ["Air", "N2", "He", "×"];
   bindGas = ["Air", "He", "Air", "Air"];
   diaphragm = "spcc"
-  CHroles = ["Pc", "m1", "m2", "l1", "l2", "pI", "pQ", "rI", "rQ", "pitot", "×"];
+  CHroles = CHroles;
   binds : {name: string, role:string}[]= [
     {name: "CH1-1[V]", role :"Pc"},   {name: "CH1-2[V]", role :"×"},
     {name: "CH2-1[V]", role :"m1"},   {name: "CH2-2[V]", role :"×"},
