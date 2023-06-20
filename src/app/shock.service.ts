@@ -40,7 +40,7 @@ export class ShockService {
     V_P.print();
 
     this.P = V_P;
-    const names = ["t", "Med1", "Med2", "Low1", "Low2"]
+    const names = ["t", "Med1", "Med2", "Low1", "Low2", "Pitot"]
     for (let index = 0; index < this.P.columns.length; index++) {
       this.P.columns[index] = names[index];   
     }

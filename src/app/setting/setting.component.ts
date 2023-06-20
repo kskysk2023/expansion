@@ -8,7 +8,7 @@ import { MicroService } from '../micro.service';
 import { ShockService } from '../shock.service';
 import { FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { CHroles } from '../prepare/prepare.component';
+import { CHroles, CHrolesC, CHrolesP, CHrolesR, CHrolesS } from '../prepare/prepare.component';
 
 @Component({
   selector: 'app-setting',
@@ -50,10 +50,10 @@ export class SettingComponent implements OnInit {
   }
 
   onSelectedChanged() {
-    const compression = this.binds.filter((value, index) => value.role == "Pc");
-    const shock = this.binds.filter(value => ["m1", "m2", "l1", "l2", "pitot"].includes(value.role));
-    const rupture =this.binds.filter(value => ["rI", "rQ"].includes(value.role));
-    const piston = this.binds.filter(value => ["pI", "pQ2"].includes(value.role));
+    const compression = this.binds.filter(value => CHrolesC.includes(value.role));
+    const shock = this.binds.filter(value => CHrolesS.includes(value.role));
+    const rupture =this.binds.filter(value => CHrolesR.includes(value.role));
+    const piston = this.binds.filter(value => CHrolesP.includes(value.role));
     console.log(["時間[s]", ...compression.map(value => value.name)])
     if (compression !== undefined) {
       this.compService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...compression.map(value => value.name)] }));
@@ -75,6 +75,7 @@ export class SettingComponent implements OnInit {
     this.progressValue = 60;
 
     const df = new dfd.DataFrame(results.data);
+    this.binds = [];
     //最終行に余分な公があるので削る
     df.drop({index: [df.shape[0] -1], inplace:true})
     

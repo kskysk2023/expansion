@@ -3,7 +3,11 @@ import { CompService, getNameFromM } from '../comp.service';
 import { HttpClient } from '@angular/common/http';
 import { SettingService, getPistonMat, mats } from '../setting.service';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
-export const CHroles : string[] = ["Pc", "m1", "m2", "l1", "l2", "pI", "pQ", "rI", "rQ", "pitot", "×"];
+export const CHrolesC : string[] = ["Pc"];
+export const CHrolesS : string[] = ["m1", "m2", "l1", "l2","pitot"];
+export const CHrolesP : string[] = ["pI", "pQ"];
+export const CHrolesR : string[] = ["rI", "rQ"];
+export const CHroles : string[] = [...CHrolesC, ...CHrolesS.slice(0, -1), ...CHrolesP, ...CHrolesR, "pitot","×"];
 export const GasName : string[] = ["Air", "N2", "He", "×"];
 @Component({
   selector: 'app-prepare',

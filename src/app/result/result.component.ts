@@ -33,13 +33,13 @@ export class ResultComponent implements OnInit{
       },
       height:600,
       width:1400,
-      yaxis2: {
+      yaxis: {
         title: "PCB Voltage, V",
-        side:"right",
-        overlaying: 'y' // 重ねて表示するために追加
+        side:"left",
       },
       xaxis: {
         title: "time, s",
+        range:[0, 4e-3]
       },
     },
     config : {
@@ -89,7 +89,7 @@ export class ResultComponent implements OnInit{
             y: this.shockService.P.column(colname).values as number[],
             name:colname,
             mode:"lines",
-            yaxis:"y2"
+            yaxis:"y1"
           });
         }
       });
