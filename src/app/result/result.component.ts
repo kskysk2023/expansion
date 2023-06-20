@@ -33,21 +33,8 @@ export class ResultComponent implements OnInit{
       },
       height:600,
       width:1400,
-      yaxis:{
-        title: "Compression Tube Pressure, MPa",
-      },
       yaxis2: {
         title: "PCB Voltage, V",
-        side:"right",
-        overlaying: 'y' // 重ねて表示するために追加
-      },
-      yaxis3: {
-        title: "Power, V2",
-        color:"#abc",
-        automargin: true,
-        range: [0, 3e-4],
-        position:0.9,
-        gridcolor:"#abc",
         side:"right",
         overlaying: 'y' // 重ねて表示するために追加
       },
@@ -90,16 +77,6 @@ export class ResultComponent implements OnInit{
     //reset
     this.graph.data = [{ x: [] as number[], y: [] as number[], mode: 'scatter', yaxis:"y1" ,name:""}];
 
-    if(this.compService.Pc){
-      console.log("圧縮管のデータがある");
-      this.graph.data.push({
-        x: t,
-        y: this.compService.Pc["Pc"].values,
-        name:"圧縮",
-        mode:'lines',
-        yaxis:"y1"
-      });
-    }
     if(this.shockService.P){
       const cols = this.shockService.P.columns;
       console.log("PCBのセンサは", cols.length - 1, "個ある");
@@ -115,24 +92,6 @@ export class ResultComponent implements OnInit{
             yaxis:"y2"
           });
         }
-      });
-    }
-    if(this.microService.PistonData){
-      this.graph.data.push({
-        x: t,
-        y: this.microService.PistonData["P"].values,
-        name:"power_p",
-        mode:"lines",
-        yaxis:"y3",
-      });
-    }
-    if(this.microService.RuptData){
-      this.graph.data.push({
-        x: t,
-        y: this.microService.RuptData["P"].values,
-        name:"power_r",
-        mode:"lines",
-        yaxis:"y3",
       });
     }
   }

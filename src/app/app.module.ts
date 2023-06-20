@@ -18,7 +18,7 @@ import { CommonModule } from '@angular/common';
 import {MatToolbarModule} from '@angular/material/toolbar'; 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
-import {ProgressBarMode, MatProgressBarModule} from '@angular/material/progress-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ShockComponent } from './shock/shock.component';
 import { CompComponent } from './comp/comp.component';
 import { MatInputModule } from '@angular/material/input';
@@ -27,7 +27,10 @@ import { MicroComponent } from './micro/micro.component';
 import { PrepareComponent } from './prepare/prepare.component';
 import { ResultComponent } from './result/result.component';
 import {MatTabsModule} from '@angular/material/tabs';
+import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import {MatButtonModule} from '@angular/material/button'; 
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -64,7 +67,10 @@ PlotlyModule.plotlyjs = PlotlyJS;
     FormsModule,
     HttpClientModule,
     MatTabsModule,
-    MatButtonModule
+    MatButtonModule,
+    NgxMaterialTimepickerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   exports: [
     MatStepperModule

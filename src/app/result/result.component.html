@@ -1,11 +1,7 @@
 <app-setting></app-setting>
 
 <!-- Next Steps -->
-<mat-card class="card">
-  <mat-card-actions>
-    <plotly-plot [data]="graph.data" [layout]="graph.layout" [config]="graph.config" (plotlyClick)="onPlotlyClick($event)"></plotly-plot>
-  </mat-card-actions>
-</mat-card>
+<plotly-plot [data]="graph.data" [layout]="graph.layout" [config]="graph.config" (plotlyClick)="onPlotlyClick($event)"></plotly-plot>
 
 <app-shock></app-shock>
 

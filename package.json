@@ -38,6 +38,7 @@
     "material-icons": "^1.13.8",
     "material-icons-font": "^2.1.0",
     "ng2-charts": "^4.1.1",
+    "ngx-material-timepicker": "^13.1.0",
     "ngx-papaparse": "^7.0.0",
     "os-browserify": "^0.3.0",
     "papaparse": "^5.4.1",

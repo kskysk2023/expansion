@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CompService } from '../comp.service';
 import { HttpClient } from '@angular/common/http';
 import { SettingService } from '../setting.service';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 export const CHroles : string[] = ["Pc", "m1", "m2", "l1", "l2", "pI", "pQ", "rI", "rQ", "pitot", "×"];
 @Component({
   selector: 'app-prepare',
@@ -14,6 +15,8 @@ export class PrepareComponent {
   bindGas = ["Air", "He", "Air", "Air"];
   diaphragm = "spcc"
   CHroles = CHroles;
+  selectedDate : Date | null= null;
+  time = "";
   binds : {name: string, role:string}[]= [
     {name: "CH1-1[V]", role :"Pc"},   {name: "CH1-2[V]", role :"×"},
     {name: "CH2-1[V]", role :"m1"},   {name: "CH2-2[V]", role :"×"},
@@ -39,8 +42,16 @@ export class PrepareComponent {
     this.data['Wp'] = {value : 0.28, unit : "kg"};
   }
   onSelectedChanged() {
+
   }
-  onSaveClick(){}
+  onDateChange(event : MatDatepickerInputEvent<Date>){
+    this.selectedDate = event.value; // This is the selected date
+  }
+  onTimeChange(time : Event){
+    console.log(time)
+    //this.time = time;
+  }
+  onSaveClick(){    console.log(this.selectedDate, this.time);}
   onButtonClick(name : string){
     switch(name){
       case "arm":
