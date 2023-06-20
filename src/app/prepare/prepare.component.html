@@ -7,12 +7,16 @@
     </mat-form-field>
 
     <mat-form-field>
-        <input [ngxTimepicker]="timepicker" matInput placeholder="Choose time" [value]="this.time" (timeupdate)="onTimeChange($event)">
-        <ngx-material-timepicker #timepicker></ngx-material-timepicker>
+        <input matInput [ngxMatTimepicker]="timepicker" [format]=24 [(ngModel)]="this.time" placeholder="実験時刻">
+        <ngx-mat-timepicker #timepicker></ngx-mat-timepicker>
     </mat-form-field>
 </div>
 
 <div>
+    <mat-form-field>
+        <mat-label>No.</mat-label>
+        <input matInput type="number" [(ngModel)]="this.shotNum">
+    </mat-form-field>
     <mat-form-field>
         <mat-label>貯気槽のガス</mat-label>
         <mat-select [(value)]="this.bindGas[0]" (selectionChange)="onSelectedChanged()">
@@ -64,8 +68,8 @@
     </mat-form-field>
     <mat-form-field>
         <mat-label>第一隔膜</mat-label>
-        <mat-select [(value)]="this.diaphragm" (selectionChange)="onSelectedChanged()">
-            <mat-option *ngFor="let matd of ['Al','spcc', 'PLA', 'ABS']" [value]="matd">{{matd}}</mat-option>
+        <mat-select [(value)]="this.data['matd1']" (selectionChange)="onSelectedChanged()">
+            <mat-option *ngFor="let matd of matds" [value]="this.matds.indexOf(matd)">{{matd}}</mat-option>
         </mat-select>
     </mat-form-field>
     <mat-form-field>

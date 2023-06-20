@@ -5,6 +5,37 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { getKappaM } from './comp.service';
 
+export const mats = ["Al", "spcc", "PLA", "ABS"];
+
+export function getWp(name: string){
+  let Wp = 10;
+  if(name == "SUS"){
+    Wp = 0.99;
+  }
+  else if(name == "Al"){
+    Wp = 0.28;
+  }
+  else if(name == "MC60"){
+    Wp = 0.17;
+  }
+  return Wp;
+}
+export function getPistonMat(wp : number){
+  let name = "";
+  switch(wp){
+    case 0.28:
+      name = "Al";
+      break;
+    case 0.99:
+      name = "SUS";
+      break;
+    case 0.17:
+      name = "MC60";
+      break;
+  }
+  return name;
+}
+
 export interface Condition{
   Shot:number;
 }
@@ -23,7 +54,7 @@ export class SettingService {
   wsresult: XLSX.WorkSheet |undefined;
   private eventSubject = new Subject<any>;
   t : dfd.Series = new dfd.Series;
-  mats = ["Al", "spcc", "PLA", "ABS"];
+  mats = mats;
 
   constructor() { }
   setDataFrame(df : dfd.DataFrame){
@@ -108,16 +139,7 @@ export class SettingService {
       console.log('Excelパート名に一致するセルの値:', rowData);
 
       //sellからデータへ
-      let Wp = 0.28;
-      if(rowData[7] == "SUS"){
-        Wp = 0.99;
-      }
-      else if(rowData[7] == "Al"){
-        Wp = 0.28;
-      }
-      else if(rowData[7] == "MC60"){
-        Wp = 0.17;
-      }
+      let Wp = getWp(rowData[7]);
 
       b["kR"] = {value : getKappaM(rowData[10]).kappa, unit:"-"};
       b["kC"] = {value : getKappaM(rowData[11]).kappa, unit:"-"};

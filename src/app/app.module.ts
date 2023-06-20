@@ -27,7 +27,7 @@ import { MicroComponent } from './micro/micro.component';
 import { PrepareComponent } from './prepare/prepare.component';
 import { ResultComponent } from './result/result.component';
 import {MatTabsModule} from '@angular/material/tabs';
-import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
+import { NgxMatTimepickerModule } from 'ngx-mat-timepicker';
 import {MatButtonModule} from '@angular/material/button'; 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -68,7 +68,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     HttpClientModule,
     MatTabsModule,
     MatButtonModule,
-    NgxMaterialTimepickerModule,
+    NgxMatTimepickerModule,
     MatDatepickerModule,
     MatNativeDateModule,
   ],

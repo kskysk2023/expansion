@@ -4,6 +4,18 @@ import * as XLSX from 'xlsx';
 import { rowData } from './app.component';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
 import { Subject } from 'rxjs';
+
+export function senkeiKinji(x1: number, x2: number, y1: number, y2: number, x: number): number {
+  const y = ((y2 - y1) / (x2 - x1)) * (x - x1) + y1;
+  console.log("x1:", x1, "x2:", x2, "y1:",y1, "y2:",y2, "x:", x, "y:", y);
+  return y;
+}
+
+export function senkeiKinjix(x1: number, x2: number, y1: number, y2: number, y: number): number {
+  const x = ((x2 - x1) / (y2 - y1)) * (y - y1) + x1;
+  console.log("x1:", x1, "x2:", x2, "y1:",y1, "y2:",y2, "x:", x, "y:", y);
+  return x;
+}
 export function getKappaM(name : string) {
   let kappa = 10e4;
   let M = 2e4;      
@@ -34,17 +46,6 @@ export function getNameFromM(M : number){
   providedIn: 'root'
 })
 export class CompService {
-  senkeiKinji(x1: number, x2: number, y1: number, y2: number, x: number): number {
-    const y = ((y2 - y1) / (x2 - x1)) * (x - x1) + y1;
-    console.log("x1:", x1, "x2:", x2, "y1:",y1, "y2:",y2, "x:", x, "y:", y);
-    return y;
-  }
-  
-  senkeiKinjix(x1: number, x2: number, y1: number, y2: number, y: number): number {
-    const x = ((x2 - x1) / (y2 - y1)) * (y - y1) + x1;
-    console.log("x1:", x1, "x2:", x2, "y1:",y1, "y2:",y2, "x:", x, "y:", y);
-    return x;
-  }
   public Pc: dfd.DataFrame | undefined;
   private Pmax: number = 0;
   private Pr: number = 0;
@@ -108,8 +109,8 @@ export class CompService {
       )).le(this.Pr)).index[0];
     console.log("PrIndex...",this.PrIndex, "H_end_row...", this.H_end_row);
 
-    this.t_hold_start = this.senkeiKinjix(this.Pc["t"].iat(this.PrIndex - 1), this.Pc["t"].iat(this.PrIndex), this.Pc["Pc"].iat(this.PrIndex - 1), this.Pc["Pc"].iat(this.PrIndex), this.Pr);
-    this.t_hold_end = this.senkeiKinjix(this.Pc["t"].iat(this.H_end_row - 1), this.Pc["t"].iat(this.H_end_row), this.Pc["Pc"].iat(this.H_end_row - 1), this.Pc["Pc"].iat(this.H_end_row), this.Pr);
+    this.t_hold_start = senkeiKinjix(this.Pc["t"].iat(this.PrIndex - 1), this.Pc["t"].iat(this.PrIndex), this.Pc["Pc"].iat(this.PrIndex - 1), this.Pc["Pc"].iat(this.PrIndex), this.Pr);
+    this.t_hold_end = senkeiKinjix(this.Pc["t"].iat(this.H_end_row - 1), this.Pc["t"].iat(this.H_end_row), this.Pc["Pc"].iat(this.H_end_row - 1), this.Pc["Pc"].iat(this.H_end_row), this.Pr);
     console.log("construct compressiontube ... "+ this.Pmax, this.Pr, this.PrIndex, this.H_end_row, this.t_hold_start, this.t_hold_end)
 
     this.Pc.addColumn("tm", this.Pc["t"].mul(1000), {inplace:true});

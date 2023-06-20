@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { CompService } from '../comp.service';
+import { CompService, getNameFromM } from '../comp.service';
 import { HttpClient } from '@angular/common/http';
-import { SettingService } from '../setting.service';
+import { SettingService, getPistonMat, mats } from '../setting.service';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 export const CHroles : string[] = ["Pc", "m1", "m2", "l1", "l2", "pI", "pQ", "rI", "rQ", "pitot", "×"];
+export const GasName : string[] = ["Air", "N2", "He", "×"];
 @Component({
   selector: 'app-prepare',
   templateUrl: './prepare.component.html',
@@ -11,12 +12,13 @@ export const CHroles : string[] = ["Pc", "m1", "m2", "l1", "l2", "pI", "pQ", "rI
 })
 export class PrepareComponent {
   displayedColumns: string[] = ['name', 'value', 'unit'];
-  GasName : string[] = ["Air", "N2", "He", "×"];
+  GasName = GasName;
   bindGas = ["Air", "He", "Air", "Air"];
-  diaphragm = "spcc"
+  matds = mats;
   CHroles = CHroles;
   selectedDate : Date | null= null;
   time = "";
+  shotNum = 0;
   binds : {name: string, role:string}[]= [
     {name: "CH1-1[V]", role :"Pc"},   {name: "CH1-2[V]", role :"×"},
     {name: "CH2-1[V]", role :"m1"},   {name: "CH2-2[V]", role :"×"},
@@ -40,6 +42,7 @@ export class PrepareComponent {
     this.data['td2'] = {value : 12, unit : "μm"};
     this.data['T0'] = {value : 297, unit : "K"};
     this.data['Wp'] = {value : 0.28, unit : "kg"};
+    this.data['matd1'] = {value: 0, unit : "-"};
   }
   onSelectedChanged() {
 
@@ -47,11 +50,34 @@ export class PrepareComponent {
   onDateChange(event : MatDatepickerInputEvent<Date>){
     this.selectedDate = event.value; // This is the selected date
   }
-  onTimeChange(time : Event){
-    console.log(time)
-    //this.time = time;
+
+  onSaveClick(){
+    console.log(this.selectedDate, this.time);
+    this.selectedDate?.setHours(Number(this.time.slice(0, 2)), Number(this.time.slice(3, this.time.length)));
+    console.log(this.time.slice(3, this.time.length))
+    let date = new Date();
+
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;  // JavaScriptの月は0から始まるため1を加える
+    let day = date.getDate();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+
+    // 数値が1桁だった場合に0を先頭に付加するための関数
+    function pad(n: number): string {
+      return n < 10 ? '0' + n : n.toString();
+    }
+
+    let formattedDate = `${year}_${pad(month)}_${pad(day)}_${pad(hours)}_${pad(minutes)}`;
+    console.log(formattedDate);  // "2023_06_18_10_30" のように表示
+    let out : (number | string)[] = [
+      this.shotNum, formattedDate,
+      "", "", "",
+      mats[this.data["matd1"].value], this.data["Dth"].value, getPistonMat(this.data["Wp"].value), this.data["td2"].value,
+      this.data["groove"].value, ...this.bindGas, this.data['PR0'].value, this.data['PC0'].value, this.data['PM0'].value, this.data['PL0'].value,
+    ];
   }
-  onSaveClick(){    console.log(this.selectedDate, this.time);}
+
   onButtonClick(name : string){
     switch(name){
       case "arm":
