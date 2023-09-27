@@ -35,12 +35,12 @@ export class ShockService {
     this.eventSubject.next(event);
   }
 
-  SetData(V_P:dfd.DataFrame){
-    console.log("V_P...");
-    V_P.print();
-
+  SetData(V_P:dfd.DataFrame | undefined){
     this.P = V_P;
-    const names = ["t", "Med1", "Med2", "Low1", "Low2", "Pitot"]
+    if(this.P == undefined)return;
+
+    this.P.rename({"時間[s]":"t"}, {inplace:true})
+    const names = ["t", "Pm1", "Pm2", "Pl1", "Pl2", "Pitot"]
     for (let index = 0; index < this.P.columns.length; index++) {
       this.P.columns[index] = names[index];   
     }
@@ -123,10 +123,19 @@ export class ShockService {
   }
 
   public write(wb: any): void {
-    if(this.P == undefined){
+    if(this.P == undefined || this.P.columns.length < 3){
       console.log("SetDataが呼ばれていない");
       return;
     }
+    var d : dfd.DataFrame = this.P;
+    d.addColumn("Time", this.P["t"].mul(1000), {inplace:true, atIndex:1});
+    const table1Data = [
+      ["t", "t", "Pm1", "Pm2", "Pl1", "Pl2", "Pitot"],
+      ["s", "ms", "V", "V", "V", "V", "V"],
+      ...d.values
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(table1Data, {skipHeader:true})
     const f = this.getData();
     const t = [
       Object.values(f).map((value) => value.name),
@@ -134,7 +143,7 @@ export class ShockService {
       Object.values(f).map((value) => value.value)
     ];
     console.log(t);
-    const ws = XLSX.utils.json_to_sheet(t, {skipHeader:true});
+    XLSX.utils.sheet_add_json(ws, t, {skipHeader:true, origin:"H1"});
 
     XLSX.utils.book_append_sheet(wb, ws, 'shock');
   }

@@ -1,6 +1,6 @@
 import { Injectable, OnInit } from '@angular/core';
 import * as dfd from "danfojs";
-import { Subject } from 'rxjs';
+import { Subject, pipe } from 'rxjs';
 import * as XLSX from "xlsx";
 @Injectable({
   providedIn: 'root'
@@ -21,10 +21,21 @@ export class MicroService implements OnInit {
   emitEvent(event : string){
     this.eventSubject.next(event);
   }
-  SetData(IQ: dfd.DataFrame, mode : "piston" | "rupture") {
+  SetData(IQ: dfd.DataFrame | undefined, mode : "piston" | "rupture") {
     const data = IQ; // this.data を data に置き換え
-    data.print();
     const names = ["t", "I", "Q"];
+
+    //undefinedに設定する場合
+    if(data == undefined){
+      if(mode == "piston"){
+        this.PistonData = undefined;
+      }
+      else{
+        this.RuptData = undefined;
+      }
+      return;
+    }
+
     for (let index = 0; index < data.columns.length; index++) {
       data.columns[index] = names[index];
     }
@@ -140,10 +151,11 @@ export class MicroService implements OnInit {
   public write(wb: any, mode : "piston" | "rupture"): void {
     console.log("Microwave writing...")
     let IQ : dfd.DataFrame;
-    if(this.PistonData && mode == "piston"){
+    if(this.PistonData && this.PistonData.columns.length > 2 && mode == "piston"){
+      console.log(this.PistonData.columns)
       IQ = this.PistonData;
     }
-    else if(this.RuptData && mode == "rupture"){
+    else if(this.RuptData && this.RuptData.columns.length > 2 && mode == "rupture"){
       IQ = this.RuptData;
     }
     else {

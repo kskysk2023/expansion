@@ -5,7 +5,9 @@ import { ResultComponent } from './result/result.component';
 
 const routes: Routes = [
   {path : "prepare", component: PrepareComponent},
-  {path : "result", component : ResultComponent}];
+  {path : "result", component : ResultComponent},
+  {path : "**", redirectTo : "/"}
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

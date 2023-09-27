@@ -6,9 +6,10 @@ import * as dfd from 'danfojs';
 import { CompService, getKappaM, getNameFromM } from '../comp.service';
 import { MicroService } from '../micro.service';
 import { ShockService } from '../shock.service';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CHroles, CHrolesC, CHrolesP, CHrolesR, CHrolesS } from '../prepare/prepare.component';
+import { Observable, Subject, pairwise, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-setting',
@@ -23,7 +24,9 @@ export class SettingComponent implements OnInit {
   });
   public CHs :string[] = [];
   binds : {name: string, role:string}[]= [];
+  oldBinds : {name : string, role: string}[] = [];
   CHroles = CHroles;
+  
   constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, private formBuilder: FormBuilder,
               public microService : MicroService, public shockService : ShockService, private http: HttpClient){
 
@@ -48,25 +51,40 @@ export class SettingComponent implements OnInit {
       fileReader.readAsArrayBuffer(fileBlob);
     });
   }
+  
+  onSelectedChanged(index : any, isInit? : boolean) {
 
-  onSelectedChanged() {
+    if(!isInit && CHrolesC.includes(this.oldBinds[index].role)){
+      this.compService.SetData(undefined);
+    }else if(!isInit && CHrolesS.includes(this.oldBinds[index].role)){
+      this.shockService.SetData(undefined);
+    }else if(!isInit && CHrolesP.includes(this.oldBinds[index].role)){
+      this.microService.SetData(undefined, "piston");
+    }else if(!isInit && CHrolesR.includes(this.oldBinds[index].role)){
+      this.microService.SetData(undefined, "rupture");
+    }
+
     const compression = this.binds.filter(value => CHrolesC.includes(value.role));
     const shock = this.binds.filter(value => CHrolesS.includes(value.role));
     const rupture =this.binds.filter(value => CHrolesR.includes(value.role));
     const piston = this.binds.filter(value => CHrolesP.includes(value.role));
     console.log(["時間[s]", ...compression.map(value => value.name)])
-    if (compression !== undefined) {
+
+    //indexがどのサービスに対応するか
+    console.log(this.binds, this.oldBinds, index );
+    if (isInit || CHrolesC.includes(this.binds[index].role) || CHrolesC.includes(this.oldBinds[index].role) ) {
       this.compService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...compression.map(value => value.name)] }));
     }
-    if (shock.length > 1) {
+    if (isInit || CHrolesS.includes(this.binds[index].role) || CHrolesS.includes(this.oldBinds[index].role) ) {
       this.shockService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...shock.map(v => v.name)] }));
     }
-    if (rupture.length > 1) {
-      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...rupture.map(v => v.name)] }), "rupture");
-    }
-    if (piston.length > 1) {
+    if (isInit || CHrolesP.includes(this.binds[index].role) || CHrolesP.includes(this.oldBinds[index].role) ) {
       this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...piston.map(v => v.name)] }), "piston");
     }
+    if (isInit || CHrolesR.includes(this.binds[index].role) || CHrolesR.includes(this.oldBinds[index].role) ) {
+      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...rupture.map(v => v.name)] }), "rupture");
+    }
+    this.oldBinds = this.binds.map(v => ({...v}));
   }
 
   oncomplete =(results : ParseResult<any>) =>{
@@ -92,13 +110,14 @@ export class SettingComponent implements OnInit {
         role = CHroles[index];
       }
       this.binds.push({name: value, role});
-    })
+      this.oldBinds.push({name: value, role});
+    });
 
     //setするとイベントが送信される
     this.settingService.setDataFrame(df);
     
     //dfの割り当て
-    this.onSelectedChanged();
+    this.onSelectedChanged(1, true);
 
     //ガスと圧力をShockTube結果から読み込む
     const bind = this.settingService.getResult();

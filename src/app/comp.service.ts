@@ -85,12 +85,11 @@ export class CompService {
     this.eventSubject.next(event);
   }
 
-  SetData(V_Pc:dfd.DataFrame){
+  SetData(V_Pc:dfd.DataFrame | undefined){
     this.Pc = V_Pc;
-    console.log("V_Pc...");
-    V_Pc.print();
+    if(this.Pc == undefined)return;
 
-    const secondColumn = V_Pc.columns[1];
+    const secondColumn = this.Pc.columns[1];
     console.log(secondColumn)
     this.Pc.addColumn("Pc", this.Pc.column(secondColumn).add(1.4).mul(25.482), {inplace:true});
     this.Pc = this.Pc.rename({"時間[s]":"t", 1: "Pc"});

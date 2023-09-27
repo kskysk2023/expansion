@@ -13,7 +13,7 @@
       <div class="binds">
         <mat-form-field  *ngFor="let bind of binds; let i = index">
             <mat-label>{{bind.name}}</mat-label>
-            <mat-select [(value)]="bind.role" (selectionChange)="onSelectedChanged()">
+            <mat-select [(value)]="bind.role" (selectionChange)="onSelectedChanged(i)">
             <mat-option *ngFor="let role of CHroles" [value]="role">{{role}}</mat-option>
             </mat-select>
         </mat-form-field>
