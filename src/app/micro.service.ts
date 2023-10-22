@@ -6,10 +6,8 @@ import * as XLSX from "xlsx";
   providedIn: 'root'
 })
 export class MicroService implements OnInit {
-  public PistonData: dfd.DataFrame | undefined;
-  public RuptData: dfd.DataFrame | undefined;
+  public df: dfd.DataFrame | undefined;
   private num: number | undefined;
-  private tati :number = 0;
   private ts: number | undefined;
   private eventSubject = new Subject<any>;
 
@@ -21,72 +19,47 @@ export class MicroService implements OnInit {
   emitEvent(event : string){
     this.eventSubject.next(event);
   }
-  SetData(IQ: dfd.DataFrame | undefined, mode : "piston" | "rupture") {
-    const data = IQ; // this.data を data に置き換え
+  SetData(IQ: dfd.DataFrame | undefined, lambda_g : number) {
+    this.df = IQ; // this.data を data に置き換え
+    if(this.df == undefined)return;
+
     const names = ["t", "I", "Q"];
 
-    //undefinedに設定する場合
-    if(data == undefined){
-      if(mode == "piston"){
-        this.PistonData = undefined;
-      }
-      else{
-        this.RuptData = undefined;
-      }
-      return;
-    }
-
-    for (let index = 0; index < data.columns.length; index++) {
-      data.columns[index] = names[index];
+    for (let index = 0; index < this.df.columns.length; index++) {
+      this.df.columns[index] = names[index];
     }
   
     //this.IQ["時間[s]"].print()
-    data.print();
-    data.tail().print();
-    this.num = data.shape[0];
+    //this.df.tail().print();
+    this.num = this.df.shape[0];
   
-    console.log(data.columns);
-  
-    data.print();
-    data.addColumn("P", data.column("I").pow(2).add(data.column("Q").pow(2)), { inplace: true });
-  
-    const tt = data.column("P").loc(data["P"].ge(0.0025)).index[0];
-    if (tt == undefined) {
-      this.tati = 0;
-    } else {
-      this.tati = tt as number;
-    }
-    console.log(data.column("t").iat(this.tati) as number);
-    //立ち上がりをt=0にする
-    data.column("t").sub(data.column("t").iat(this.tati) as number, { inplace: true });
-    console.log("`始まりはt=", data.column("t").iat(this.tati) as number * 1000 + "ms");
-    //msスケールも作る
-    data.addColumn("tm", data.column("t").mul(1000), { inplace: true });
+    console.log(this.df.columns);
+ 
+    this.df.addColumn("P", this.df.column("I").pow(2).add(this.df.column("Q").pow(2)), { inplace: true });
   
     console.log("calculating θ...");
-    data.addColumn("θ", data.apply(
+    this.df.addColumn("θ", this.df.apply(
       (row: any) => {
         if (typeof row[2] != "number" || typeof row[1] != "number") console.log(row, typeof row[2]);
         return Math.atan2(row[2], row[1]);
       }
     ) as dfd.Series, { inplace: true });
-    data["θ"].print();
+    //this.df["θ"].print();
   
     console.log("calculating Δθ...");
   
-    var shiftarr: number[] = data["θ"].copy().values;
+    var shiftarr: number[] = this.df["θ"].copy().values;
     shiftarr.unshift(0);
     shiftarr.pop();
-    console.log(shiftarr);
     var shifted = new dfd.Series(shiftarr);
-    shifted.print();
+    //shifted.print();
+    
     console.log("θ...");
-    data.column("θ").print();
-    //data.column("θ").sub(shifted).print();
-    data.addColumn("Δθ", data.column("θ").sub(shifted), { inplace: true });
+    //this.df.column("θ").print();
+    this.df.addColumn("Δθ", this.df.column("θ").sub(shifted), { inplace: true });
   
     console.log("calculating Δn...");
-    data.addColumn("Δn", data["Δθ"].apply((element: number) => {
+    this.df.addColumn("Δn", this.df["Δθ"].apply((element: number) => {
       if (element == undefined || Math.abs(element) < 5) {
         return 0; // 最初の要素の場合は差分を計算できないのでnullを返す
       } else {
@@ -96,16 +69,16 @@ export class MicroService implements OnInit {
   
     console.log("calculating n...");
     const n: number[] = [0];
-    const dn = data["Δn"].values;
+    const dn = this.df["Δn"].values;
     console.log(this.num);
     for (var i = 1; i < this.num; i++) {
       n.push(dn[i] + n[i - 1]);
     }
-    data.addColumn("n", new dfd.Series(n) as dfd.Series, { inplace: true });
+    this.df.addColumn("n", new dfd.Series(n) as dfd.Series, { inplace: true });
   
     console.log("calculating ...θs");
     var thetaS: number[] = [];
-    const theta: number[] = data["θ"].values;
+    const theta: number[] = this.df["θ"].values;
     for (var i = 0; i < this.num; i++) {
       if (dn[i] != 0) {
         thetaS.push(2.0 * n[i] * Math.PI - Math.PI);
@@ -113,69 +86,58 @@ export class MicroService implements OnInit {
         thetaS.push(theta[i] + 2.0 * n[i] * Math.PI);
       }
     }
-    data.addColumn("θs", new dfd.Series(thetaS) as dfd.Series, { inplace: true });
-    data["θs"].sub(data["θs"].iat(this.tati), { inplace: true }); //0点合わせ
+    this.df.addColumn("θs", new dfd.Series(thetaS) as dfd.Series, { inplace: true });
   
-    data.addColumn("x", data["θs"].mul(0.06522).div(2.0 * Math.PI), { inplace: true });
+    this.df.addColumn("x", this.df["θs"].mul(lambda_g).div(2.0 * Math.PI), { inplace: true });
+
+    //0点合わせを計算
+    //t=0の行を取得する
+    const t0row = this.df.column("t").eq(0).index[0] as number;
+    console.log("`始まりはt=", this.df.column("t").iat(t0row) + "ms");
+    this.df.column("t").sub(this.df.column("t").iat(t0row) as number, { inplace: true });
+    this.df.column("θs").sub(this.df.column("θs").iat(t0row) as number, {inplace: true});
+
+    //msスケールも作る
+    this.df.addColumn("tm", this.df.column("t").mul(1000), { inplace: true });
   
-    const f = data.column("t").iat(4) as number;
-    if (f != undefined) {
-      this.ts = data.column("t").iat(5) as number - f;
-    } else {
-      this.ts = 0;
-    }
+    //Δtの計算
+    this.ts = (this.df.column("t").iat(5) as number) - (this.df.column("t").iat(4) as number);
+    
+    //vの計算
     //data["v"] = data["x"].diff({ periods: 1, axis: 0 }).div(this.ts).values[0];
   
-    data.print();
+    //this.df.print();
   
     //計算が完了したことを報告
     console.log("計算完了マイクロ波");
     this.emitEvent("load");
-  
-    if(mode == "piston"){
-      this.PistonData = data;
-    }else {
-      this.RuptData = data;
-    }
   }
-  public setCalculatedData(df : dfd.DataFrame, mode: "piston" | "rupture"){
-    if(mode == "piston"){
-      this.PistonData = df.drop({index:[0]});
-    }
-    else if(mode == "rupture"){
-      this.RuptData = df.drop({index:[0]});
-    }
+
+  public setCalculatedData(df : dfd.DataFrame){
+    this.df = df.drop({index:[0]});
     this.emitEvent("load")
   }
 
-  public write(wb: any, mode : "piston" | "rupture"): void {
+  public write(wb: any, sheetName : string): void {
     console.log("Microwave writing...")
-    let IQ : dfd.DataFrame;
-    if(this.PistonData && this.PistonData.columns.length > 2 && mode == "piston"){
-      console.log(this.PistonData.columns)
-      IQ = this.PistonData;
-    }
-    else if(this.RuptData && this.RuptData.columns.length > 2 && mode == "rupture"){
-      IQ = this.RuptData;
-    }
-    else {
+    if(this.df == undefined){
       console.log("micro波で書き込むデータがありません")
       return ;
     }
 
-    var d : dfd.DataFrame = new dfd.DataFrame([IQ.column("t").values, IQ.column("tm").values, IQ.column("P").values, IQ.column("θ").values, 
-                                               IQ.column("Δθ").values, IQ.column("Δn").values,IQ.column("n").values,
-                                               IQ.column("θs").values, IQ.column("x").values ]).transpose();
+    var d : dfd.DataFrame = new dfd.DataFrame([this.df.column("tm").values, this.df.column("I").values, this.df.column("Q").values,
+                                              this.df.column("P").values, this.df.column("θ").values,
+                                              this.df.column("θs").values, this.df.column("x").values ]).transpose();
 
-    d.tail().print()
+    //d.tail().print()
     const table1Data = [
-      ["t", "t", "P",  "θ",  "Δθ", "Δn", "n", "θs", "x"],
-      ["s", "ms", "V2","rad","rad","-",  "-", "rad","m"],
+      ["t", "I", "Q", "P",  "θ",  "θs", "x"],
+      ["ms","V", "V", "V2", "rad","rad","m"],
       ...d.values
     ];
 
     const ws = XLSX.utils.json_to_sheet(table1Data, {skipHeader:true})
 
-    XLSX.utils.book_append_sheet(wb, ws, mode);
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
   }
 }

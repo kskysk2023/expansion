@@ -28,9 +28,10 @@ export class SettingComponent implements OnInit {
   CHroles = CHroles;
   
   constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, private formBuilder: FormBuilder,
-              public microService : MicroService, public shockService : ShockService, private http: HttpClient){
-
+              public pistonService : MicroService, public ruptureService : MicroService,
+              public shockService : ShockService, private http: HttpClient){
   }
+
   ngOnInit(): void {
     this.readExcelFile("ShockTube.xlsx");
   }
@@ -59,9 +60,9 @@ export class SettingComponent implements OnInit {
     }else if(!isInit && CHrolesS.includes(this.oldBinds[index].role)){
       this.shockService.SetData(undefined);
     }else if(!isInit && CHrolesP.includes(this.oldBinds[index].role)){
-      this.microService.SetData(undefined, "piston");
+      this.pistonService.SetData(undefined, 0.06522);
     }else if(!isInit && CHrolesR.includes(this.oldBinds[index].role)){
-      this.microService.SetData(undefined, "rupture");
+      this.ruptureService.SetData(undefined, 0.0611);
     }
 
     const compression = this.binds.filter(value => CHrolesC.includes(value.role));
@@ -79,10 +80,10 @@ export class SettingComponent implements OnInit {
       this.shockService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...shock.map(v => v.name)] }));
     }
     if (isInit || CHrolesP.includes(this.binds[index].role) || CHrolesP.includes(this.oldBinds[index].role) ) {
-      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...piston.map(v => v.name)] }), "piston");
+      this.pistonService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...piston.map(v => v.name)] }), 0.06522);
     }
     if (isInit || CHrolesR.includes(this.binds[index].role) || CHrolesR.includes(this.oldBinds[index].role) ) {
-      this.microService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...rupture.map(v => v.name)] }), "rupture");
+      this.ruptureService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...rupture.map(v => v.name)] }), 0.0651);
     }
     this.oldBinds = this.binds.map(v => ({...v}));
   }
@@ -204,10 +205,10 @@ export class SettingComponent implements OnInit {
               this.compService.setCalculatedData(sheetData);
               break;
             case "piston":
-              this.microService.setCalculatedData(sheetData, "piston");
+              this.pistonService.setCalculatedData(sheetData);
               break;
             case "rupture":
-              this.microService.setCalculatedData(sheetData, "rupture")
+              this.ruptureService.setCalculatedData(sheetData);
               break;    
             case "shock":
               this.shockService.setCalculatedData(sheetData);
@@ -225,8 +226,8 @@ export class SettingComponent implements OnInit {
     const wb = XLSX.utils.book_new();
 
     this.compService.write(wb);
-    this.microService.write(wb, "piston");
-    this.microService.write(wb, "rupture");
+    this.pistonService.write(wb, "piston");
+    this.ruptureService.write(wb, "rupture");
     this.shockService.write(wb);
     const wbout = XLSX.write(wb, {bookType: "xlsx", type:"array"});
     const blob = new Blob([wbout], { type: 'application/octet-stream' });
