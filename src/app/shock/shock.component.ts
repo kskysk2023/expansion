@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { ShockService } from '../shock.service';
+import { SettingService } from '../setting.service';
+import { Shock } from '../shock';
 
 @Component({
   selector: 'app-shock',
@@ -8,7 +9,10 @@ import { ShockService } from '../shock.service';
 })
 export class ShockComponent {
   displayedColumns: string[] = ['name', 'value', 'unit'];
+  shock : Shock;
 
-  constructor(public shockService: ShockService){}
+  constructor(public settingService: SettingService){
+    this.shock = settingService.shock;
+  }
   ngOnInit(){ }
 }

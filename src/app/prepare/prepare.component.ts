@@ -1,14 +1,9 @@
 import { Component } from '@angular/core';
-import { CompService, getNameFromM } from '../comp.service';
 import { HttpClient } from '@angular/common/http';
-import { SettingService, getPistonMat, mats } from '../setting.service';
+import { SettingService } from '../setting.service';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
-export const CHrolesC : string[] = ["Pc"];
-export const CHrolesS : string[] = ["m1", "m2", "l1", "l2","pitot"];
-export const CHrolesP : string[] = ["pI", "pQ"];
-export const CHrolesR : string[] = ["rI", "rQ"];
-export const CHroles : string[] = [...CHrolesC, ...CHrolesS.slice(0, -1), ...CHrolesP, ...CHrolesR, "pitot","×"];
-export const GasName : string[] = ["Air", "N2", "He", "×"];
+import { CHroles, GasName, getPistonMat, mats } from '../funcs';
+
 @Component({
   selector: 'app-prepare',
   templateUrl: './prepare.component.html',
@@ -36,7 +31,7 @@ export class PrepareComponent {
   public data : {[key : string]: {value: number, unit : string}} = {};
   armed = false;
 
-  constructor(public compService: CompService, private http : HttpClient, private settingSerive: SettingService){
+  constructor(private http : HttpClient, private settingSerive: SettingService){
     this.data['PR0'] = {value : 1, unit : "MPa"};
     this.data['PC0'] = {value : 101.3, unit : "kPa"};
     this.data['PM0'] = {value : 1, unit : "kPa"};

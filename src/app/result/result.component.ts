@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ReplaySubject } from 'rxjs';
-import { rowData } from '../app.component';
-import { CompService } from '../comp.service';
-import { MicroService } from '../micro.service';
 import { SettingService } from '../setting.service';
-import { ShockService } from '../shock.service';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { Papa } from 'ngx-papaparse';
+import { rowData } from '../funcs';
+import { Comp } from '../comp';
+import { Shock } from '../shock';
 
 @Component({
   selector: 'app-result',
@@ -17,6 +16,8 @@ import { Papa } from 'ngx-papaparse';
 export class ResultComponent implements OnInit{
   displayedColumns: string[] = ['name', 'value', 'unit'];
   dataComp = new ReplaySubject<rowData[]>;
+  comp : Comp;
+  shock : Shock;
 
   graph = {
     data : [
@@ -47,16 +48,12 @@ export class ResultComponent implements OnInit{
       displaylogo: false,
     }
   }
-  constructor(private dialog : MatDialog, private papa: Papa, public settingService: SettingService,
-              public compService : CompService, public microService : MicroService, public shockService : ShockService){}
+  constructor(private dialog : MatDialog, private papa: Papa, public settingService: SettingService){
+    this.comp = this.settingService.comp;
+    this.shock = this.settingService.shock;
+  }
   ngOnInit(){
-    this.shockService.getEvent().subscribe((value) => {
-      this.CalcData();
-    });
-    this.compService.getEvent().subscribe((value) => {
-      this.CalcData();
-    });
-    this.microService.getEvent().subscribe((value) => {
+    this.settingService.getEvent().subscribe((value) => {
       this.CalcData();
     });
   }
@@ -70,23 +67,21 @@ export class ResultComponent implements OnInit{
   CalcData(){
     console.log("set data")
 
-    const new_df = this.settingService.getDataFrame() //resets the index to Date column
-    new_df.head().print() //
     const t = this.settingService.getTime().values as number[];
 
     //reset
     this.graph.data = [{ x: [] as number[], y: [] as number[], mode: 'scatter', yaxis:"y1" ,name:""}];
 
-    if(this.shockService.P){
-      const cols = this.shockService.P.columns;
+    if(this.shock.P){
+      const cols = this.shock.P.columns;
       console.log("PCBのセンサは", cols.length - 1, "個ある");
     
       cols.forEach((colname : string, index : number) => {
         if(index == 0){return;}
-        if(this.shockService.P){
+        if(this.shock.P){
           this.graph.data.push({
             x: t,
-            y: this.shockService.P.column(colname).values as number[],
+            y: this.shock.P.column(colname).add(index - 1).values as number[],
             name:colname,
             mode:"lines",
             yaxis:"y1"
@@ -98,12 +93,12 @@ export class ResultComponent implements OnInit{
 
   onPlotlyClick(event :any){
     console.log(event.points[0].data.name)
-    const shocks = this.shockService.P?.columns;
+    const shocks = this.shock.P?.columns;
     const plotnum = shocks?.findIndex((v) => v === event.points[0].data.name);
     if(plotnum != -1 && plotnum){
       //時間の列を除くために-1
       console.log(event.points[0].x)
-      this.shockService.onPlotClick(plotnum -1, event.points[0].x);
+      this.shock.onPlotClick(plotnum -1, event.points[0].x);
     }
   }
 }

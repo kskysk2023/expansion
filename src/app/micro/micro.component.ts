@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
-import { MicroService } from '../micro.service';
-import { CompService } from '../comp.service';
 import { SettingService } from '../setting.service';
-import { ShockService } from '../shock.service';
-import { rowData } from '../app.component';
+import { rowData } from '../funcs';
+import { Micro } from '../Micro';
 
 @Component({
   selector: 'app-micro',
@@ -62,78 +60,60 @@ export class MicroComponent {
       displaylogo: false,
     }
   }
+  piston : Micro;
+  rupt : Micro;
 
-  constructor(public microService : MicroService, public compService : CompService, private settingService: SettingService, private shockService : ShockService){ }
+  constructor(private settingService: SettingService){
+    this.piston = settingService.piston;
+    this.rupt = settingService.rupt;
+  }
 
   ngAfterViewInit(){
-    this.microService.getEvent().subscribe((event) => {
+    this.settingService.getEvent().subscribe((event) => {
       this.load();
     });
-    this.compService.getEvent().subscribe((event) => {
-      this.load();
-    });
-    this.shockService.getEvent().subscribe((event) => {
-      this.load();
-    })
-    this.shockService.getDataSource().subscribe((event) => {
-      this.load();
-    })
   }
 
   load(){
-    this.settingService.getTime().print();
+    //this.settingService.getTime().print();
     const t = this.settingService.getTime().mul(1000).values as number[];
     console.log(t[0])
     
     //reset
     this.graph.data = [{ x: [] as number[], y: [] as number[], mode: 'scatter', yaxis:"y1" ,name:"", line : {dash:"solid"}}];
 
-    if(this.compService.Pc){
+    if(this.settingService.comp.Pc){
       this.graph.data.push({
           x: t,
-          y: this.compService.Pc["Pc"].values,
+          y: this.settingService.comp.Pc["Pc"].values,
           name:"圧縮",
           mode:'lines',
           yaxis:"y1",
           line:{dash:"solid"}
       });
     }
-    if(this.microService.PistonData){
+    if(this.piston.df){
       this.graph.data.push({
         x: t,
-        y: this.microService.PistonData["x"].values,
+        y: this.piston.df["x"].values,
         name:"xp",
         mode:"lines",
         yaxis:"y2",
         line:{dash:"solid"}
-      },      {
-        x: t,
-        y: this.microService.PistonData["P"].values,
-        name:"power_p",
-        mode:"lines",
-        yaxis:"y3",
-        line:{dash:"solid"}
       });
     }
-    if(this.microService.RuptData){
+    if(this.rupt.df){
       this.graph.data.push({
         x: t,
-        y: this.microService.RuptData["x"].values,
+        y: this.rupt.df["x"].values,
         name:"xr",
         mode:"lines",
         yaxis:"y2",
         line:{dash:"solid"}
-      },      {
-        x: t,
-        y: this.microService.RuptData["P"].values,
-        name:"power_r",
-        mode:"lines",
-        yaxis:"y3",
-        line:{dash:"solid"}
       });
     }    
 
-    const TP = this.shockService.getTP();
+    const TP = this.settingService.shock.getTP();
     TP.forEach((value : rowData, index) => {
       let name = index < 2?"Low":"Med";
       name = name + ((index % 2) + 1).toString();

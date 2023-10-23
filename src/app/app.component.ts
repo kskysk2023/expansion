@@ -1,9 +1,4 @@
 import { Component } from '@angular/core';
-export interface rowData {
-  name : string;
-  value : number;
-  unit : string;
-};
 
 @Component({
   selector: 'app-root',

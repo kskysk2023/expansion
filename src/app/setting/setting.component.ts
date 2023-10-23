@@ -3,13 +3,9 @@ import { SettingService } from '../setting.service';
 import * as XLSX from 'xlsx';
 import { Papa, ParseResult } from 'ngx-papaparse';
 import * as dfd from 'danfojs';
-import { CompService, getKappaM, getNameFromM } from '../comp.service';
-import { MicroService } from '../micro.service';
-import { ShockService } from '../shock.service';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { CHroles, CHrolesC, CHrolesP, CHrolesR, CHrolesS } from '../prepare/prepare.component';
-import { Observable, Subject, pairwise, startWith } from 'rxjs';
+import { CHroles, CHrolesC, CHrolesP, CHrolesR, CHrolesS, role, roles } from '../funcs';
 
 @Component({
   selector: 'app-setting',
@@ -23,13 +19,12 @@ export class SettingComponent implements OnInit {
     firstCtrl: ['', Validators.required]
   });
   public CHs :string[] = [];
-  binds : {name: string, role:string}[]= [];
-  oldBinds : {name : string, role: string}[] = [];
+  binds : role[]= [];
+  oldBinds : role[] = [];
   CHroles = CHroles;
   
-  constructor(private papa: Papa, public settingService : SettingService, public compService : CompService, private formBuilder: FormBuilder,
-              public pistonService : MicroService, public ruptureService : MicroService,
-              public shockService : ShockService, private http: HttpClient){
+  constructor(private papa: Papa, public settingService : SettingService, private formBuilder: FormBuilder,
+              private http: HttpClient){
   }
 
   ngOnInit(): void {
@@ -54,43 +49,22 @@ export class SettingComponent implements OnInit {
   }
   
   onSelectedChanged(index : any, isInit? : boolean) {
-
-    if(!isInit && CHrolesC.includes(this.oldBinds[index].role)){
-      this.compService.SetData(undefined);
-    }else if(!isInit && CHrolesS.includes(this.oldBinds[index].role)){
-      this.shockService.SetData(undefined);
-    }else if(!isInit && CHrolesP.includes(this.oldBinds[index].role)){
-      this.pistonService.SetData(undefined, 0.06522);
-    }else if(!isInit && CHrolesR.includes(this.oldBinds[index].role)){
-      this.ruptureService.SetData(undefined, 0.0611);
-    }
-
-    const compression = this.binds.filter(value => CHrolesC.includes(value.role));
-    const shock = this.binds.filter(value => CHrolesS.includes(value.role));
-    const rupture =this.binds.filter(value => CHrolesR.includes(value.role));
-    const piston = this.binds.filter(value => CHrolesP.includes(value.role));
-    console.log(["時間[s]", ...compression.map(value => value.name)])
+    let roles : roles = {compRole : [], shockRole: [], pistonRole: [], ruptRole: []};
+    roles.compRole = this.binds.filter(value => CHrolesC.includes(value.role));
+    roles.shockRole = this.binds.filter(value => CHrolesS.includes(value.role));
+    roles.ruptRole = this.binds.filter(value => CHrolesR.includes(value.role));
+    roles.pistonRole = this.binds.filter(value => CHrolesP.includes(value.role));
 
     //indexがどのサービスに対応するか
     console.log(this.binds, this.oldBinds, index );
-    if (isInit || CHrolesC.includes(this.binds[index].role) || CHrolesC.includes(this.oldBinds[index].role) ) {
-      this.compService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...compression.map(value => value.name)] }));
-    }
-    if (isInit || CHrolesS.includes(this.binds[index].role) || CHrolesS.includes(this.oldBinds[index].role) ) {
-      this.shockService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...shock.map(v => v.name)] }));
-    }
-    if (isInit || CHrolesP.includes(this.binds[index].role) || CHrolesP.includes(this.oldBinds[index].role) ) {
-      this.pistonService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...piston.map(v => v.name)] }), 0.06522);
-    }
-    if (isInit || CHrolesR.includes(this.binds[index].role) || CHrolesR.includes(this.oldBinds[index].role) ) {
-      this.ruptureService.SetData(this.settingService.getDataFrame().loc({ columns: ["時間[s]", ...rupture.map(v => v.name)] }), 0.0651);
-    }
-    this.oldBinds = this.binds.map(v => ({...v}));
+    
+    //サービスで各データに割り当て
+    this.settingService.SetData(roles);
   }
 
   oncomplete =(results : ParseResult<any>) =>{
     if(results.errors)console.log(results.errors)
-    console.log(results.data);
+    //console.log(results.data);
     this.progressValue = 60;
 
     const df = new dfd.DataFrame(results.data);
@@ -98,7 +72,7 @@ export class SettingComponent implements OnInit {
     //最終行に余分な公があるので削る
     df.drop({index: [df.shape[0] -1], inplace:true})
     
-    df.print()
+    //df.print()
     this.progressValue = 70;
 
     //メニューにchを登録
@@ -120,7 +94,8 @@ export class SettingComponent implements OnInit {
     //dfの割り当て
     this.onSelectedChanged(1, true);
 
-    //ガスと圧力をShockTube結果から読み込む
+    //ガスと圧力をShockTube結果から読み込む　＊いつか作る
+    /*
     const bind = this.settingService.getResult();
     if(bind != undefined){
       this.compService.data = bind;
@@ -128,6 +103,7 @@ export class SettingComponent implements OnInit {
       this.compService.emitEvent("setBindGas")
       this.compService.calc();
     }
+     */
 
     this.progressValue = 80;
         
@@ -137,7 +113,7 @@ export class SettingComponent implements OnInit {
 
   async ReadCsv(text: string){
     const editedtext = text.replaceAll("\+", "");
-    console.log(editedtext);
+    //console.log(editedtext);
     this.progressValue = 40;
 
     // 修正されたテキストをBlobに変換する
@@ -198,6 +174,7 @@ export class SettingComponent implements OnInit {
           const sheetName = sheetNames[i];
     
           console.log(sheetName);
+/* 
           switch (sheetName) {
             case "comp":
               const t = sheetData["t"] as dfd.Series;
@@ -216,6 +193,7 @@ export class SettingComponent implements OnInit {
             default:
               break;
           }
+           */
         }
       };
       reader.readAsArrayBuffer(file);
@@ -225,10 +203,8 @@ export class SettingComponent implements OnInit {
   DownloadExcel(event : Event){
     const wb = XLSX.utils.book_new();
 
-    this.compService.write(wb);
-    this.pistonService.write(wb, "piston");
-    this.ruptureService.write(wb, "rupture");
-    this.shockService.write(wb);
+    this.settingService.write(wb);
+
     const wbout = XLSX.write(wb, {bookType: "xlsx", type:"array"});
     const blob = new Blob([wbout], { type: 'application/octet-stream' });
 

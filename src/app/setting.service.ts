@@ -3,42 +3,10 @@ import { of } from 'rxjs/internal/observable/of';
 import * as dfd from 'danfojs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import * as XLSX from 'xlsx';
-import { getKappaM } from './comp.service';
-
-export const mats = ["Al", "spcc", "PLA", "ABS"];
-
-export function getWp(name: string){
-  let Wp = 10;
-  if(name == "SUS"){
-    Wp = 0.99;
-  }
-  else if(name == "Al"){
-    Wp = 0.28;
-  }
-  else if(name == "MC60"){
-    Wp = 0.17;
-  }
-  return Wp;
-}
-export function getPistonMat(wp : number){
-  let name = "";
-  switch(wp){
-    case 0.28:
-      name = "Al";
-      break;
-    case 0.99:
-      name = "SUS";
-      break;
-    case 0.17:
-      name = "MC60";
-      break;
-  }
-  return name;
-}
-
-export interface Condition{
-  Shot:number;
-}
+import { CHrolesP, CHrolesR, CHrolesS, getKappaM, getWp, mats, role, roles, rowData } from './funcs';
+import { Comp } from './comp';
+import { Shock } from './shock';
+import { Micro } from './Micro';
 
 @Injectable({
   providedIn: 'root'
@@ -55,18 +23,27 @@ export class SettingService {
   private eventSubject = new Subject<any>;
   t : dfd.Series = new dfd.Series;
   mats = mats;
+  oldRoles : roles = {compRole: [], shockRole: [], pistonRole: [], ruptRole: []};
+  comp : Comp = new Comp;
+  shock : Shock = new Shock;
+  piston : Micro = new Micro;
+  rupt : Micro = new Micro;
 
   constructor() { }
+
   setDataFrame(df : dfd.DataFrame){
     this.df = df;
     this.t = df["時間[s]"];
     this.emitEvent("load");
   }
+
   getDataFrame(){return this.df;}
+  
   setTime(t :dfd.Series){
     this.t = t
     this.emitEvent("load")
   }
+
   getTime(){return this.t}
 
   updateCHBindProperty(bind: any) {
@@ -190,5 +167,63 @@ export class SettingService {
 
     }
     return b;
+  }
+
+  SetData(roles : roles) {
+    //comp shock piston rupture
+    this.oldRoles = roles;
+
+    const compD = this.df.loc({columns: [roles.compRole[0].name]});
+    compD.columns[0] = "VPc";
+    compD.addColumn("t", this.t as dfd.Series, {inplace: true, atIndex: 0})
+    //compD.print();
+    this.comp.SetData(compD);
+
+    const shockD = this.df.loc({columns: [...roles.shockRole.map(v => v.name)]});
+    console.log(roles.shockRole)
+    for (let index = 0; index < roles.shockRole.length; index++) {
+      shockD.columns[index] = CHrolesS[index];
+    }
+    shockD.addColumn("t", this.t as dfd.Series, {inplace: true, atIndex: 0})
+    this.shock.SetData(shockD);
+
+    const pistonD = this.df.loc({columns: [...roles.pistonRole.map(v => v.name)]});
+    pistonD.addColumn("t", this.t as dfd.Series, {inplace : true, atIndex : 0}); 
+    this.piston.SetData(pistonD, 0.06522);
+
+    const ruptD = this.df.loc({columns: [...roles.ruptRole.map(v => v.name)]});
+    ruptD.addColumn("t", this.t as dfd.Series, {inplace : true, atIndex : 0}); 
+    this.rupt.SetData(ruptD, 0.611);
+
+    this.emitEvent("load");
+  }
+
+  write(wb : XLSX.WorkBook){
+    const compTable = this.comp.write();
+    if(compTable){
+      const ws = XLSX.utils.json_to_sheet(compTable[0], {skipHeader:true});
+      XLSX.utils.sheet_add_json(ws, compTable[1], {skipHeader:true, origin:"E1"});
+      XLSX.utils.book_append_sheet(wb, ws, 'comp');
+    }
+
+    const shockTable = this.shock.write();
+    if(shockTable){
+      const ws = XLSX.utils.json_to_sheet(shockTable[0], {skipHeader:true});
+      XLSX.utils.sheet_add_json(ws, shockTable[1], {skipHeader:true, origin:"H1"});
+      XLSX.utils.book_append_sheet(wb, ws, 'shock');
+    }
+
+    const pistonTable = this.piston.write();
+    if(pistonTable){
+      const ws = XLSX.utils.json_to_sheet(pistonTable, {skipHeader:true});
+      XLSX.utils.book_append_sheet(wb, ws, 'piston');
+    }
+    
+    const ruptTable = this.rupt.write();
+    if(ruptTable){
+      const ws = XLSX.utils.json_to_sheet(ruptTable, {skipHeader:true});
+      XLSX.utils.book_append_sheet(wb, ws, 'rupture');
+    }
+    return ;
   }
 }

@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { CompService, getKappaM, getNameFromM } from '../comp.service';
 import { SettingService } from '../setting.service';
+import { getKappaM, getNameFromM } from '../funcs';
+import { Comp } from '../comp';
 
 @Component({
   selector: 'app-comp',
@@ -13,30 +14,34 @@ export class CompComponent implements AfterViewInit{
   bindGas = ["Air", "He", "Air", "Air"];
   matd1s = ['Al','spcc', 'PLA', 'ABS'];
   diaphragm = ""
-  constructor(public compService : CompService, public settingService: SettingService){}
+  comp: Comp;
+
+  constructor(public settingService: SettingService){
+    this.comp = this.settingService.comp;
+  }
   ngAfterViewInit(){ 
-    this.compService.getEvent().subscribe((value) => {
+    this.settingService.getEvent().subscribe((value) => {
       if(value == "setBindGas"){
-        this.bindGas[0] = getNameFromM(this.compService.data["MR"].value)
-        this.bindGas[1] = getNameFromM(this.compService.data["MC"].value)
-        this.bindGas[2] = getNameFromM(this.compService.data["MM"].value)
-        this.bindGas[3] = getNameFromM(this.compService.data["ML"].value)
+        this.bindGas[0] = getNameFromM(this.comp.data["MR"].value)
+        this.bindGas[1] = getNameFromM(this.comp.data["MC"].value)
+        this.bindGas[2] = getNameFromM(this.comp.data["MM"].value)
+        this.bindGas[3] = getNameFromM(this.comp.data["ML"].value)
       }
-      this.diaphragm = this.matd1s[this.compService.data["matd1"].value];
+      this.diaphragm = this.matd1s[this.comp.data["matd1"].value];
     })
   }
   onSelectedChanged(){
-    this.compService.data["MR"] = {value: getKappaM(this.bindGas[0]).M, unit : "-"};
-    this.compService.data["MC"] = {value: getKappaM(this.bindGas[1]).M, unit : "-"};
-    this.compService.data["MM"] = {value: getKappaM(this.bindGas[2]).M, unit : "-"};
-    this.compService.data["ML"] = {value: getKappaM(this.bindGas[3]).M, unit : "-"};
+    this.comp.data["MR"] = {value: getKappaM(this.bindGas[0]).M, unit : "-"};
+    this.comp.data["MC"] = {value: getKappaM(this.bindGas[1]).M, unit : "-"};
+    this.comp.data["MM"] = {value: getKappaM(this.bindGas[2]).M, unit : "-"};
+    this.comp.data["ML"] = {value: getKappaM(this.bindGas[3]).M, unit : "-"};
   
-    this.compService.data["kR"] = {value: getKappaM(this.bindGas[0]).kappa, unit : "-"};
-    this.compService.data["kC"] = {value: getKappaM(this.bindGas[1]).kappa, unit : "-"};
-    this.compService.data["kM"] = {value: getKappaM(this.bindGas[2]).kappa, unit : "-"};
-    this.compService.data["kL"] = {value: getKappaM(this.bindGas[3]).kappa, unit : "-"};
+    this.comp.data["kR"] = {value: getKappaM(this.bindGas[0]).kappa, unit : "-"};
+    this.comp.data["kC"] = {value: getKappaM(this.bindGas[1]).kappa, unit : "-"};
+    this.comp.data["kM"] = {value: getKappaM(this.bindGas[2]).kappa, unit : "-"};
+    this.comp.data["kL"] = {value: getKappaM(this.bindGas[3]).kappa, unit : "-"};
   
-    this.compService.data["matd1"] = {value: this.settingService.mats.indexOf(this.diaphragm), unit : "-"};
-    this.compService.calc()
+    this.comp.data["matd1"] = {value: this.settingService.mats.indexOf(this.diaphragm), unit : "-"};
+    this.comp.calc()
   }
 }
