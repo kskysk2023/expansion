@@ -37,10 +37,10 @@ export class ResultComponent implements OnInit{
       yaxis: {
         title: "PCB Voltage, V",
         side:"left",
+        range:[-200e-3, 500e-3]
       },
       xaxis: {
         title: "time, s",
-        range:[0, 4e-3]
       },
     },
     config : {
@@ -81,7 +81,8 @@ export class ResultComponent implements OnInit{
         if(this.shock.P){
           this.graph.data.push({
             x: t,
-            y: this.shock.P.column(colname).add(index - 1).values as number[],
+            //上下にずらして表示するためオフセットを加算 10e-3Vずづずらす
+            y: this.shock.P.column(colname).add(100e-3 * (index - 1)).values as number[],
             name:colname,
             mode:"lines",
             yaxis:"y1"

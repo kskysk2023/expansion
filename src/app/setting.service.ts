@@ -173,27 +173,36 @@ export class SettingService {
     //comp shock piston rupture
     this.oldRoles = roles;
 
-    const compD = this.df.loc({columns: [roles.compRole[0].name]});
-    compD.columns[0] = "VPc";
-    compD.addColumn("t", this.t as dfd.Series, {inplace: true, atIndex: 0})
-    //compD.print();
-    this.comp.SetData(compD);
-
-    const shockD = this.df.loc({columns: [...roles.shockRole.map(v => v.name)]});
-    console.log(roles.shockRole)
-    for (let index = 0; index < roles.shockRole.length; index++) {
-      shockD.columns[index] = CHrolesS[index];
+    if(roles.compRole.length == 1){
+      const compD = this.df.loc({columns: [roles.compRole[0].name]});
+      compD.columns[0] = "VPc";
+      compD.addColumn("t", this.t as dfd.Series, {inplace: true, atIndex: 0})
+      //compD.print();
+      this.comp.SetData(compD);
     }
-    shockD.addColumn("t", this.t as dfd.Series, {inplace: true, atIndex: 0})
-    this.shock.SetData(shockD);
 
-    const pistonD = this.df.loc({columns: [...roles.pistonRole.map(v => v.name)]});
-    pistonD.addColumn("t", this.t as dfd.Series, {inplace : true, atIndex : 0}); 
-    this.piston.SetData(pistonD, 0.06522);
+    if(roles.shockRole.length != 0){
+      const shockD = this.df.loc({columns: [...roles.shockRole.map(v => v.name)]});
+      console.log(roles.shockRole)
+      for (let index = 0; index < roles.shockRole.length; index++) {
+        shockD.columns[index] = CHrolesS[index];
+      }
+      shockD.addColumn("t", this.t as dfd.Series, {inplace: true, atIndex: 0})
+      this.shock.SetData(shockD);
+  }
 
-    const ruptD = this.df.loc({columns: [...roles.ruptRole.map(v => v.name)]});
-    ruptD.addColumn("t", this.t as dfd.Series, {inplace : true, atIndex : 0}); 
-    this.rupt.SetData(ruptD, 0.611);
+    if(roles.pistonRole.length == 2){
+      const pistonD = this.df.loc({columns: [...roles.pistonRole.map(v => v.name)]});
+      pistonD.addColumn("t", this.t as dfd.Series, {inplace : true, atIndex : 0}); 
+      this.piston.SetData(pistonD, 0.06522);
+    }
+
+    if(roles.ruptRole.length == 2){
+      const ruptD = this.df.loc({columns: [...roles.ruptRole.map(v => v.name)]});
+      ruptD.addColumn("t", this.t as dfd.Series, {inplace : true, atIndex : 0});
+      this.rupt.SetData(ruptD, 0.611);
+    }
+
 
     this.emitEvent("load");
   }

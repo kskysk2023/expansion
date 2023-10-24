@@ -9,6 +9,7 @@ export class Micro{
     SetData(IQ: dfd.DataFrame | undefined, lambda_g : number) {
         this.df = IQ; // this.data を data に置き換え
         if(this.df == undefined)return;
+        this.df.print()
         
         console.log("Micro calc...")
 
@@ -39,7 +40,7 @@ export class Micro{
       
         console.log("calculating Δn...");
         this.df.addColumn("Δn", this.df["Δθ"].apply((element: number) => {
-          if (element == undefined || Math.abs(element) < 5) {
+          if (element == undefined || Math.abs(element) < 3.14) {
             return 0; // 最初の要素の場合は差分を計算できないのでnullを返す
           } else {
             return -element / Math.abs(element);
